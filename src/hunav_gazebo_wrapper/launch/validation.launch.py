@@ -275,7 +275,7 @@ def generate_launch_description():
         description='Name of the topic in which navigation goal for the robot will be published'
     )
     declare_ignore_models = DeclareLaunchArgument(
-        'ignore_models', default_value='aws_robomaker_warehouse_GroundB_01_001',
+        'ignore_models', default_value='ground_plane user_camera sun',
         description='list of Gazebo models that the agents should ignore as obstacles as the ground_plane. Indicate the models with a blank space between them'
     )
     declare_arg_verbose = DeclareLaunchArgument(
