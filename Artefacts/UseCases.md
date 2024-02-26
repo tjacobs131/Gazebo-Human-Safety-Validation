@@ -1,5 +1,5 @@
 # Use Cases
-The table below shows the use cases for the Alpha Ceres related to human actors in the area of operation. The cases themselves cover the main behaviors of people related to the Alpha Ceres. They do not explicitly include all the combinations of behaviors people can display in the simulation. The simulation allows for six different reactions to them being in vicinity of the Alpha Ceres. Each of them will be tested for each of the use cases. The descriptions of the reactions are available here: https://github.com/robotics-upo/hunav_sim?tab=readme-ov-file#features<br><br>
+The table below shows the use cases for the Alpha Ceres related to human actors in the area of operation. The cases themselves cover the main behaviors of people related to the Alpha Ceres. They do not explicitly include all the combinations of behaviors people can display in the simulation. The simulation allows for six different reactions to them being in vicinity of the Alpha Ceres. Each of them will be validated for each of the use cases. The descriptions of the reactions are available here: https://github.com/robotics-upo/hunav_sim?tab=readme-ov-file#features<br><br>
 
 | Use Case ID | Description | Actors | Preconditions | Postconditions | Flow |
 |-------------|-------------|-------|--------------|---------------|-------------|
