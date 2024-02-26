@@ -189,9 +189,9 @@ def generate_launch_description():
 
     # Finally, spawn the pmb2 robot in Gazebo
     gazebo_spawn = PathJoinSubstitution(
-        [FindPackageShare("pmb2_gazebo"),
+        [FindPackageShare("hunav_gazebo_wrapper"),
         "launch",
-        "pmb2_spawn.launch.py"],
+        "pmb2_pal.launch.py"],
     )
 
     spawn_robot = IncludeLaunchDescription(
@@ -300,7 +300,7 @@ def generate_launch_description():
             description='The robot initial pitch angle in the world')
     declare_arg_pY = DeclareLaunchArgument('gzpose_Y', default_value='0.0',
             description='The robot initial yaw angle in the world')
-    declare_arg_laser = DeclareLaunchArgument('laser_model', default_value='sick-571-gpu',
+    declare_arg_laser = DeclareLaunchArgument('laser_model', default_value='sick-571',
             description='the laser model to be used')
     declare_arg_rgbd = DeclareLaunchArgument('rgbd_sensors', default_value='false',
             description='whether to use rgbd cameras or not')

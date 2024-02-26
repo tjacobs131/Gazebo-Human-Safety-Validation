@@ -183,9 +183,7 @@ def generate_launch_description():
         shell=True,
         on_exit=Shutdown(),
         #condition=IfCondition(LaunchConfiguration('server_required')),
-    )
-
-    
+    )    
 
     # Finally, spawn the pmb2 robot in Gazebo
     gazebo_spawn = PathJoinSubstitution(
@@ -249,7 +247,7 @@ def generate_launch_description():
         description='Specify configuration file name in the cofig directory'
     )
     declare_arg_world = DeclareLaunchArgument(
-        'base_world', default_value='no_roof_small_warehouse.world',
+        'base_world', default_value='agri_hunav.world',
         description='Specify world file name'
     )
     declare_gz_obs = DeclareLaunchArgument(

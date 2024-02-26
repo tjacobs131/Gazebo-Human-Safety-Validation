@@ -17,7 +17,7 @@ def generate_launch_description():
 
     ARGUMENTS = [ 
         DeclareLaunchArgument('sim_time', default_value='true',description='flag to use sim time'),
-        DeclareLaunchArgument('map', default_value=os.path.join(bringup_dir, 'maps', 'map_cafe2.yaml'),description='Full path to map yaml file to load'),
+        DeclareLaunchArgument('map', default_value=os.path.join(bringup_dir, 'maps', 'test.yaml'),description='Full path to map yaml file to load'),
         DeclareLaunchArgument('autostart', default_value='true',description='Automatically startup the nav2 stack'),
     ]
 
