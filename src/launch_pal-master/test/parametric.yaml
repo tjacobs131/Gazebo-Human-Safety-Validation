@@ -1,4 +1,0 @@
-name: ${name}
-surname: "Doe"
-age: ${age}
-married: ${married}
