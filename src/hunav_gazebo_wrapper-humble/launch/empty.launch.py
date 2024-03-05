@@ -30,7 +30,7 @@ def generate_launch_description():
     # Pose where we want to spawn the robot
     spawn_x_val = '0.0'
     spawn_y_val = '0.0'
-    spawn_z_val = '0.0'
+    spawn_z_val = '1.3'
     spawn_yaw_val = '0.00'
 
     pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')
@@ -39,6 +39,8 @@ def generate_launch_description():
     
     default_urdf_model_path = os.path.join(pkg_share, 'models/ceres_alpha.urdf')
 
+    joystick_config = FindPackageShare(package='teleop_twist_joy').find('teleop_twist_joy')
+    joystick_config = os.path.join(joystick_config, 'config/xbox.config.yaml') 
 
     # World generation parameters
     urdf_model = LaunchConfiguration('urdf_model')
@@ -227,6 +229,28 @@ def generate_launch_description():
         package='simulation_bridge',
         executable='simulation_bridge'
     )
+    
+    joy_node = Node(
+        package='joy',
+        executable='joy_node',
+        name='joy_node',
+        parameters=[{
+        'autorepeat_rate': 20.0,
+        'deadzone': 0.3,
+        
+        }],
+        respawn=True,
+    )
+
+    teleop_node = Node(
+        package='teleop_twist_joy',
+        executable='teleop_node',
+        name='teleop_twist_joy_node',
+        parameters=[{
+        'config_filepath': joystick_config,
+        }],
+        remappings={('/cmd_vel', 'cmd_vel')},
+    )
 
     # Launch the robot
     spawn_entity_cmd = Node(
@@ -234,9 +258,9 @@ def generate_launch_description():
         executable='spawn_entity.py',
         arguments=['-entity', robot_name_in_model, 
                    '-file', default_urdf_model_path,
-                        '-x', '-1.0',
-                        '-y', '-1.0',
-                        '-z', '1.0',
+                        '-x', spawn_x_val,
+                        '-y', spawn_y_val,
+                        '-z', spawn_z_val,
                         '-Y', spawn_yaw_val],
                         output='screen')
 
@@ -320,6 +344,9 @@ def generate_launch_description():
     ld.add_action(simulation_bridge)
     ld.add_action(declare_urdf_model_path_cmd)
     ld.add_action(spawn_entity_cmd)
+
+    ld.add_action(joy_node)
+    ld.add_action(teleop_node)
 
 
     # Generate the world with the agents
