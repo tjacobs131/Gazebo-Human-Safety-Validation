@@ -1,6 +1,7 @@
 from os import path
 from os import environ
 from os import pathsep
+import os
 from scripts import GazeboRosPaths
 from ament_index_python.packages import get_package_share_directory
 
@@ -24,7 +25,23 @@ def generate_launch_description():
         '__GLX_VENDOR_LIBRARY_NAME=nvidia ',
     ]
 
+    robot_name_in_model = 'ceres_alpha'
+
+    # Pose where we want to spawn the robot
+    spawn_x_val = '0.0'
+    spawn_y_val = '0.0'
+    spawn_z_val = '0.0'
+    spawn_yaw_val = '0.00'
+
+    pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')
+    # Set the path to this package.
+    pkg_share = FindPackageShare(package='hunav_gazebo_wrapper').find('hunav_gazebo_wrapper')
+    
+    default_urdf_model_path = os.path.join(pkg_share, 'models/ceres_alpha.urdf')
+
+
     # World generation parameters
+    urdf_model = LaunchConfiguration('urdf_model')
     world_file_name = LaunchConfiguration('base_world')
     gz_obs = LaunchConfiguration('use_gazebo_obs')
     rate = LaunchConfiguration('update_rate')
@@ -93,8 +110,7 @@ def generate_launch_description():
     ])
 
     config_file_name = 'params.yaml' 
-    pkg_dir = get_package_share_directory('hunav_gazebo_wrapper') 
-    config_file = path.join(pkg_dir, 'launch', config_file_name) 
+    config_file = path.join(pkg_share, 'launch', config_file_name) 
 
     
     model, plugin, media = GazeboRosPaths.get_paths()
@@ -106,6 +122,7 @@ def generate_launch_description():
         plugin += pathsep+environ['GAZEBO_PLUGIN_PATH']
     if 'GAZEBO_RESOURCE_PATH' in environ:
         media += pathsep+environ['GAZEBO_RESOURCE_PATH']
+
 
     env = {
         'GAZEBO_MODEL_PATH': model,
@@ -211,6 +228,18 @@ def generate_launch_description():
         executable='simulation_bridge'
     )
 
+    # Launch the robot
+    spawn_entity_cmd = Node(
+        package='gazebo_ros', 
+        executable='spawn_entity.py',
+        arguments=['-entity', robot_name_in_model, 
+                   '-file', default_urdf_model_path,
+                        '-x', '-1.0',
+                        '-y', '-1.0',
+                        '-z', '1.0',
+                        '-Y', spawn_yaw_val],
+                        output='screen')
+
     # DO NOT Launch this if any robot localization is launched
     static_tf_node = Node(
         package = "tf2_ros", 
@@ -219,6 +248,12 @@ def generate_launch_description():
         arguments = ['0', '0', '0', '0', '0', '0', 'map', 'odom']
         # other option: arguments = "0 0 0 0 0 0 pmb2 base_footprint".split(' ')
     )
+
+      # Declare the launch arguments  
+    declare_urdf_model_path_cmd = DeclareLaunchArgument(
+        name='urdf_model', 
+        default_value=default_urdf_model_path, 
+        description='Absolute path to robot urdf file')
 
     declare_agents_conf_file = DeclareLaunchArgument(
         'configuration_file', default_value='agents.yaml',
@@ -243,7 +278,7 @@ def generate_launch_description():
         description='Update rate of the plugin'
     )
     declare_robot_name = DeclareLaunchArgument(
-        'robot_name', default_value='d_diff_drive_robot',
+        'robot_name', default_value='ceres_alpha',
         description='Specify the name of the robot Gazebo model'
     )
     declare_frame_to_publish = DeclareLaunchArgument(
@@ -259,10 +294,9 @@ def generate_launch_description():
         description='list of Gazebo models that the agents should ignore as obstacles as the ground_plane. Indicate the models with a blank space between them'
     )
     declare_arg_verbose = DeclareLaunchArgument(
-        'verbose', default_value='false',
+        'verbose', default_value='true',
         description='Set "true" to increase messages written to terminal.'
     )
-    
 
     ld = LaunchDescription()
 
@@ -284,6 +318,9 @@ def generate_launch_description():
     ld.add_action(declare_arg_verbose)
 
     ld.add_action(simulation_bridge)
+    ld.add_action(declare_urdf_model_path_cmd)
+    ld.add_action(spawn_entity_cmd)
+
 
     # Generate the world with the agents
     # launch hunav_loader and the WorldGenerator

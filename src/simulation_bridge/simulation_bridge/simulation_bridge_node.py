@@ -1,32 +1,47 @@
 import rclpy
 from rclpy.node import Node
 import pcg_gazebo
+from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
+import time
 
 class SimulationBridge(Node):
 
     def __init__(self):
         super().__init__('simulation_bridge')
-        simulation = pcg_gazebo.simulation
+        # Set up publisher
+        self.vel_pub = self.create_publisher(Twist, "cmd_vel", 1)
+
+        # Set up subscriber
+        self.odo_sub = self.create_subscription(Odometry, "odom", self._odometry, 1)
 
         self.get_logger().info("Started Simulation Bridge")
 
-        self.left_wheel = simulation.Link('left_wheel')
-        self.right_wheel = simulation.Link('right_wheel')
+        self.logger = self.get_logger()
+
+        start = time.time()
+        while time.time() - start < 14:
+            pass
 
         self.start()
 
+    def _odometry(self, msg):
+        self.logger.info(msg)
+
 
     def start(self):
-        print(self.left_wheel)
-        print(self.right_wheel)
+        cmd = Twist()
+        cmd.linear.x = -1.0
+
+        self.logger.info("Publishing: " + str(cmd.linear.x))
+        self.vel_pub.publish(cmd)
+        
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     simulation_bridge = SimulationBridge()
-
-    simulation_bridge.init()
 
     rclpy.spin(simulation_bridge)
 

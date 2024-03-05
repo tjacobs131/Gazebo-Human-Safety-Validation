@@ -35,6 +35,8 @@ link_directories(
   #${TINYXML2_LIBRARY_PATH}
 )
 
+include_directories("/models")
+
 
 add_library(HuNavPlugin SHARED src/HuNavPlugin.cpp)
 target_include_directories(HuNavPlugin PUBLIC include) #${ignition-common3_INCLUDE_DIRS}
