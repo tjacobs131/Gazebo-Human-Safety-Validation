@@ -231,25 +231,19 @@ def generate_launch_description():
     )
     
     joy_node = Node(
-        package='joy',
-        executable='joy_node',
-        name='joy_node',
+        package='joy', executable='joy_node', name='joy_node',
         parameters=[{
-        'autorepeat_rate': 20.0,
-        'deadzone': 0.3,
-        
-        }],
-        respawn=True,
+            'dev': '/dev/input/js0',
+            'deadzone': 0.3,
+            'autorepeat_rate': 20.0,
+        }]
     )
 
     teleop_node = Node(
-        package='teleop_twist_joy',
+        package='teleop_twist_joy', 
         executable='teleop_node',
-        name='teleop_twist_joy_node',
-        parameters=[{
-        'config_filepath': joystick_config,
-        }],
-        remappings={('/cmd_vel', 'cmd_vel')},
+        name='teleop_twist_joy_node', 
+        parameters=[joystick_config],
     )
 
     # Launch the robot
@@ -318,7 +312,7 @@ def generate_launch_description():
         description='list of Gazebo models that the agents should ignore as obstacles as the ground_plane. Indicate the models with a blank space between them'
     )
     declare_arg_verbose = DeclareLaunchArgument(
-        'verbose', default_value='true',
+        'verbose', default_value='false',
         description='Set "true" to increase messages written to terminal.'
     )
 

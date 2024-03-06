@@ -8,14 +8,14 @@
         xyz="0.0575183223591833 -8.59941650517399E-05 -0.250608579300024"
         rpy="0 0 0" />
       <mass
-        value="37.2854108654229" />
+        value="18.2854108654229" />
       <inertia
-        ixx="1.4656809345345"
-        ixy="1.33842483117091E-07"
-        ixz="-0.000270521366992657"
-        iyy="1.29215600010394"
-        iyz="0.000227238425890096"
-        izz="2.6739111172668" />
+        ixx="6.4656809345345"
+        ixy="6.33842483117091E-07"
+        ixz="-0.00570521366992657"
+        iyy="6.29215600010394"
+        iyz="0.00827238425890096"
+        izz="7.6739111172668" />
     </inertial>
     <visual>
       <origin
@@ -97,8 +97,8 @@
       effort="10"
       velocity="10" />
     <dynamics
-      damping="0.1"
-      friction="0.1" />
+      damping="0.8"
+      friction="0.3" />
   </joint>
   <link
     name="right_drive_wheel_link_1">
@@ -156,8 +156,8 @@
       effort="10"
       velocity="10" />
     <dynamics
-      damping="0.1"
-      friction="0.1" />
+      damping="0.8"
+      friction="0.3" />
   </joint>
   <link
     name="caster_right_link_1">
@@ -215,8 +215,8 @@
       effort="10"
       velocity="10" />
     <dynamics
-      damping="0.1"
-      friction="0.1" />
+      damping="0.5"
+      friction="0.6" />
   </joint>
   <link
     name="caster_wheel_right_link_1">
@@ -274,8 +274,8 @@
       effort="10"
       velocity="10" />
     <dynamics
-      damping="0.1"
-      friction="0.1" />
+      damping="0.8"
+      friction="0.2" />
   </joint>
   <link
     name="caster_left_link_1">
@@ -330,8 +330,8 @@
     <axis
       xyz="0 0 -1" />
     <dynamics
-      damping="0.1"
-      friction="0.1" />
+      damping="0.5"
+      friction="0.6" />
   </joint>
   <link
     name="caster_wheel_left_link_1">
@@ -389,8 +389,8 @@
       effort="10"
       velocity="10" />
     <dynamics
-      damping="0.1"
-      friction="0.1" />
+      damping="0.8"
+      friction="0.2" />
   </joint>
 
   <gazebo>
