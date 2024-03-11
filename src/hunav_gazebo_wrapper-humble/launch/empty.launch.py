@@ -52,6 +52,7 @@ def generate_launch_description():
     use_navgoal = LaunchConfiguration('use_navgoal_to_start')
     ignore_models = LaunchConfiguration('ignore_models')
 
+    turtlebot_launch_file_dir = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'launch')
 
     # agent configuration file
     agent_conf_file = PathJoinSubstitution([
@@ -172,7 +173,7 @@ def generate_launch_description():
     gzclient_cmd = [
         use_nvidia_gpu,
         'gzclient',
-        _boolean_command('verbose'), ' ',
+        _boolean_command('verbose'), '',
     ]
 
     gzserver_process = ExecuteProcess(
@@ -234,8 +235,8 @@ def generate_launch_description():
         package='joy', executable='joy_node', name='joy_node',
         parameters=[{
             'dev': '/dev/input/js0',
-            'deadzone': 0.3,
-            'autorepeat_rate': 20.0,
+            'deadzone': 0.1,
+            'autorepeat_rate': 10.0,
         }]
     )
 
@@ -257,6 +258,16 @@ def generate_launch_description():
                         '-z', spawn_z_val,
                         '-Y', spawn_yaw_val],
                         output='screen')
+    
+    spawn_turtlebot_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(turtlebot_launch_file_dir, 'spawn_turtlebot3.launch.py')
+        ),
+        launch_arguments={
+            'x_pose': spawn_x_val,
+            'y_pose': spawn_y_val
+        }.items()
+    )
 
     # DO NOT Launch this if any robot localization is launched
     static_tf_node = Node(
@@ -284,7 +295,7 @@ def generate_launch_description():
     )
 
     declare_arg_world = DeclareLaunchArgument(
-        'base_world', default_value='empty.world',
+        'base_world', default_value='simple.world',
         description='Specify world file name'
     )
     declare_gz_obs = DeclareLaunchArgument(
@@ -342,7 +353,6 @@ def generate_launch_description():
     ld.add_action(joy_node)
     ld.add_action(teleop_node)
 
-
     # Generate the world with the agents
     # launch hunav_loader and the WorldGenerator
     # 2 seconds later
@@ -360,12 +370,7 @@ def generate_launch_description():
     # (wait a bit for the world generation) 
     #ld.add_action(gzserver_process)
     ld.add_action(ordered_launch_event2)
-    #ld.add_action(gzclient_process)
-
-    # spawn robot in Gazebo
-    # ld.add_action(spawn_robot)
-
-    
+    #ld.add_action(gzclient_process)    
 
     return ld
 

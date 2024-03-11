@@ -20,9 +20,9 @@ class SimulationBridge(Node):
 
         self.logger = self.get_logger()
 
-        start = time.time()
-        while time.time() - start < 12:
-            pass
+        # start = time.time()
+        # while time.time() - start < 12:
+        #     pass
 
         self.start()
 
