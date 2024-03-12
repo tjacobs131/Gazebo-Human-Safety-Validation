@@ -1,7 +1,6 @@
 import math
 import rclpy
 from rclpy.node import Node
-import pcg_gazebo
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 import time

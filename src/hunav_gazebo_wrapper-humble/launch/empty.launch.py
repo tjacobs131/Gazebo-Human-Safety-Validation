@@ -52,8 +52,6 @@ def generate_launch_description():
     use_navgoal = LaunchConfiguration('use_navgoal_to_start')
     ignore_models = LaunchConfiguration('ignore_models')
 
-    turtlebot_launch_file_dir = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'launch')
-
     # agent configuration file
     agent_conf_file = PathJoinSubstitution([
         FindPackageShare('hunav_agent_manager'),
@@ -161,10 +159,10 @@ def generate_launch_description():
         'gzserver ',
         #'--pause ',
          world_path, 
-        _boolean_command('verbose'), '',
         '-s ', 'libgazebo_ros_init.so',
         '-s ', 'libgazebo_ros_factory.so',
         '-s ', 'libgazebo_ros_state.so',
+        '--verbose',
         '--ros-args',
         '--params-file', config_file,
     ]
@@ -173,7 +171,7 @@ def generate_launch_description():
     gzclient_cmd = [
         use_nvidia_gpu,
         'gzclient',
-        _boolean_command('verbose'), '',
+        '--verbose'
     ]
 
     gzserver_process = ExecuteProcess(
@@ -258,16 +256,6 @@ def generate_launch_description():
                         '-z', spawn_z_val,
                         '-Y', spawn_yaw_val],
                         output='screen')
-    
-    spawn_turtlebot_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(turtlebot_launch_file_dir, 'spawn_turtlebot3.launch.py')
-        ),
-        launch_arguments={
-            'x_pose': spawn_x_val,
-            'y_pose': spawn_y_val
-        }.items()
-    )
 
     # DO NOT Launch this if any robot localization is launched
     static_tf_node = Node(
