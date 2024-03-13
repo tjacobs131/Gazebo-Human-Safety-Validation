@@ -211,6 +211,17 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}]
     )
 
+    urdf_file = '/home/gtl/Development/Gazebo-Human-Safety-Validation/src/hunav_gazebo_wrapper-humble/media/models/ceres_alpha.urdf'
+    with open(urdf_file, 'r') as infp:
+        robot_desc = infp.read()
+
+    state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher',
+        parameters=[{'robot_description': robot_desc}]
+    )
+
     metrics_file = PathJoinSubstitution([
         FindPackageShare('hunav_evaluator'),
         'config',
@@ -222,6 +233,12 @@ def generate_launch_description():
         executable='hunav_evaluator_node',
         output='screen',
         parameters=[metrics_file]
+    )
+
+    hunav_rviz2_package = get_package_share_directory('hunav_rviz2_panel')
+
+    hunav_rviz2 = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(hunav_rviz2_package + '/launch/hunav_rviz2_launch.py'),
     )
 
     simulation_bridge = Node(
@@ -334,9 +351,13 @@ def generate_launch_description():
     ld.add_action(declare_ignore_models)
     ld.add_action(declare_arg_verbose)
 
+    ld.add_action(hunav_rviz2)
+
     ld.add_action(simulation_bridge)
     ld.add_action(declare_urdf_model_path_cmd)
     ld.add_action(spawn_entity_cmd)
+
+    ld.add_action(state_publisher)
 
     ld.add_action(joy_node)
     ld.add_action(teleop_node)

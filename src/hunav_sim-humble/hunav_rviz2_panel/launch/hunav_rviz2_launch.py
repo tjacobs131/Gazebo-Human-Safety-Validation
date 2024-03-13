@@ -16,8 +16,8 @@ def generate_launch_description():
     bringup_dir = get_package_share_directory('hunav_rviz2_panel')
 
     ARGUMENTS = [ 
-        DeclareLaunchArgument('sim_time', default_value='true',description='flag to use sim time'),
-        DeclareLaunchArgument('map', default_value=os.path.join(bringup_dir, 'maps', 'map_cafe2.yaml'),description='Full path to map yaml file to load'),
+        DeclareLaunchArgument('sim_time', default_value='false',description='flag to use sim time'),
+        DeclareLaunchArgument('map', default_value=os.path.join(bringup_dir, 'maps', 'simple.yaml'),description='Full path to map yaml file to load'),
         DeclareLaunchArgument('autostart', default_value='true',description='Automatically startup the nav2 stack'),
     ]
 
