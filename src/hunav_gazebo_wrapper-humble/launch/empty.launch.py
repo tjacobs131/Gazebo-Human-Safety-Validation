@@ -241,6 +241,14 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(hunav_rviz2_package + '/launch/hunav_rviz2_launch.py'),
     )
 
+    slam = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(pkg_share + '/launch/slam.launch.py')
+    )
+
+    nav2_bringup = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(pkg_share + '/launch/nav2_bringup.launch.py')
+    )
+
     simulation_bridge = Node(
         package='simulation_bridge',
         executable='simulation_bridge'
@@ -251,7 +259,7 @@ def generate_launch_description():
         parameters=[{
             'dev': '/dev/input/js0',
             'deadzone': 0.1,
-            'autorepeat_rate': 10.0,
+            'autorepeat_rate': 30.0,
         }]
     )
 
@@ -361,6 +369,9 @@ def generate_launch_description():
 
     ld.add_action(joy_node)
     ld.add_action(teleop_node)
+
+    #ld.add_action(slam)
+    ld.add_action(nav2_bringup)
 
     # Generate the world with the agents
     # launch hunav_loader and the WorldGenerator

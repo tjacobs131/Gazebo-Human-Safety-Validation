@@ -13,7 +13,7 @@ class SimulationBridge(Node):
         self.vel_pub = self.create_publisher(Twist, "/cmd_vel", 5)
 
         # Set up subscribers
-        self.odom_sub = self.create_subscription(Odometry, "wheel/odometry", self._odometry, 10)
+        # self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 10)
 
         self.get_logger().info("Started Simulation Bridge")
 

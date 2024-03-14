@@ -92,12 +92,13 @@ Visualization Manager:
         Value: /map_updates
       Use Timestamp: false
       Value: true
-    - Alpha: 0.5
+    - Alpha: 0.9
       Class: rviz_default_plugins/LaserScan
       Color: 160; 160; 164
       Enabled: true
       Name: LaserScan
-      Size (m): 0.1
+      Size (m): 0.15
+      Style: Boxes
       Topic:
         Depth: 5
         Durability Policy: Volatile

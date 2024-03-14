@@ -1,23 +1,21 @@
 hunav_loader:
   ros__parameters:
-    map: cafe
+    map: simple
     publish_people: true
     agents:
       - agent1
       - agent2
-      - agent7
-      - agent4
-      - agent5
+      - agent3
     agent1:
       id: 1
       skin: 0
-      behavior: 4
+      behavior: 1
       group_id: -1
       max_vel: 1.5
       radius: 0.4
       init_pose:
-        x: 3.484565
-        y: 6.934117
+        x: -4.155396
+        y: 4.803797
         z: 1.250000
         h: 0.0
       goal_radius: 0.3
@@ -25,119 +23,44 @@ hunav_loader:
       goals:
         - g0
         - g1
-        - g2
       g0:
-        x: 3.378858
-        y: -4.586833
+        x: 6.125517
+        y: 5.700662
         h: 1.250000
       g1:
-        x: -3.588942
-        y: -4.796917
-        h: 1.250000
-      g2:
-        x: -2.574025
-        y: 1.435859
+        x: 1.632029
+        y: 9.051845
         h: 1.250000
     agent2:
       id: 2
-      skin: 4
-      behavior: 6
-      group_id: -1
-      max_vel: 1.5
-      radius: 0.4
-      init_pose:
-        x: 3.308198
-        y: -10.327183
-        z: 1.250000
-        h: 0.0
-      goal_radius: 0.3
-      cyclic_goals: true
-      goals:
-        - g0
-        - g1
-        - g2
-      g0:
-        x: 1.558424
-        y: 6.163660
-        h: 1.250000
-      g1:
-        x: -1.873610
-        y: -1.645975
-        h: 1.250000
-      g2:
-        x: 0.052511
-        y: -10.047120
-        h: 1.250000
-    agent7:
-      id: 3
-      skin: 3
-      behavior: 5
-      group_id: -1
-      max_vel: 1.5
-      radius: 0.4
-      init_pose:
-        x: -4.183384
-        y: -9.522011
-        z: 1.250000
-        h: 0.0
-      goal_radius: 0.3
-      cyclic_goals: true
-      goals:
-        - g0
-        - g1
-        - g2
-      g0:
-        x: -1.662852
-        y: -7.631603
-        h: 1.250000
-      g1:
-        x: -4.079139
-        y: -4.761907
-        h: 1.250000
-      g2:
-        x: 0.717925
-        y: 1.400831
-        h: 1.250000
-    agent4:
-      id: 4
-      skin: 2
-      behavior: 2
-      group_id: -1
-      max_vel: 1.5
-      radius: 0.4
-      init_pose:
-        x: -3.554606
-        y: 5.953529
-        z: 1.250000
-        h: 0.0
-      goal_radius: 0.3
-      cyclic_goals: true
-      goals:
-        - g0
-        - g1
-        - g2
-      g0:
-        x: -2.643059
-        y: -9.592029
-        h: 1.250000
-      g1:
-        x: 1.838239
-        y: -3.501402
-        h: 1.250000
-      g2:
-        x: -4.325063
-        y: 2.766649
-        h: 1.250000
-    agent5:
-      id: 5
       skin: 1
-      behavior: 5
+      behavior: 1
       group_id: -1
       max_vel: 1.5
       radius: 0.4
       init_pose:
-        x: 1.067725
-        y: -8.156725
+        x: -3.321691
+        y: 9.297482
+        z: 1.250000
+        h: 0.0
+      goal_radius: 0.3
+      cyclic_goals: true
+      goals:
+        - g0
+      g0:
+        x: 3.236912
+        y: 3.543531
+        h: 1.250000
+    agent3:
+      id: 3
+      skin: 5
+      behavior: 1
+      group_id: -1
+      max_vel: 1.5
+      radius: 0.4
+      init_pose:
+        x: 8.943613
+        y: 2.827306
         z: 1.250000
         h: 0.0
       goal_radius: 0.3
@@ -147,14 +70,14 @@ hunav_loader:
         - g1
         - g2
       g0:
-        x: 1.348298
-        y: -1.225715
+        x: -7.342672
+        y: 2.840789
         h: 1.250000
       g1:
-        x: -0.717789
-        y: -3.326329
+        x: -8.869834
+        y: 12.307944
         h: 1.250000
       g2:
-        x: -1.522822
-        y: -5.986265
+        x: 10.744596
+        y: 12.675598
         h: 1.250000
