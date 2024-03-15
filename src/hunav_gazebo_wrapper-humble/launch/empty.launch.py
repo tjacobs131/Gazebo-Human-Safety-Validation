@@ -111,8 +111,7 @@ def generate_launch_description():
     ])
 
     config_file_name = 'params.yaml' 
-    config_file = path.join(pkg_share, 'launch', config_file_name) 
-
+    config_file = path.join(pkg_share, 'launch', config_file_name)
     
     model, plugin, media = GazeboRosPaths.get_paths()
     #print('model:', model)
@@ -219,7 +218,8 @@ def generate_launch_description():
         package='robot_state_publisher',
         executable='robot_state_publisher',
         name='robot_state_publisher',
-        parameters=[{'robot_description': robot_desc}]
+        parameters=[{'robot_description': robot_desc}],
+        
     )
 
     metrics_file = PathJoinSubstitution([
@@ -336,7 +336,7 @@ def generate_launch_description():
         description='list of Gazebo models that the agents should ignore as obstacles as the ground_plane. Indicate the models with a blank space between them'
     )
     declare_arg_verbose = DeclareLaunchArgument(
-        'verbose', default_value='false',
+        'verbose', default_value='true',
         description='Set "true" to increase messages written to terminal.'
     )
 
@@ -370,7 +370,7 @@ def generate_launch_description():
     ld.add_action(joy_node)
     ld.add_action(teleop_node)
 
-    #ld.add_action(slam)
+    # ld.add_action(slam)
     ld.add_action(nav2_bringup)
 
     # Generate the world with the agents
@@ -384,6 +384,8 @@ def generate_launch_description():
     ld.add_action(hunav_manager_node)
     # hunav evaluator
     ld.add_action(hunav_evaluator_node)
+
+    # ld.add_action(static_tf_node)
 
 
     # launch Gazebo after worldGenerator 

@@ -104,7 +104,7 @@ def generate_launch_description():
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
-        default_value='False',
+        default_value='True',
         description='Use simulation (Gazebo) clock if true',
     )
 
@@ -122,7 +122,7 @@ def generate_launch_description():
 
     declare_use_composition_cmd = DeclareLaunchArgument(
         'use_composition',
-        default_value='False',
+        default_value='True',
         description='Whether to use composed bringup',
     )
 
