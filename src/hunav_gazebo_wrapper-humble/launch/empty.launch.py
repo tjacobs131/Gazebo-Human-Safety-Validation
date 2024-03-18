@@ -209,8 +209,7 @@ def generate_launch_description():
         output='screen',
         parameters=[{'use_sim_time': True}]
     )
-
-    urdf_file = '/home/gtl/Development/Gazebo-Human-Safety-Validation/src/hunav_gazebo_wrapper-humble/media/models/ceres_alpha.urdf'
+    
     urdf_path = os.path.join(pkg_share + "/models/ceres_alpha.urdf")
     with open(urdf_path, 'r') as infp:
         robot_desc = infp.read()
