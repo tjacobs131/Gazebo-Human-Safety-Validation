@@ -449,7 +449,7 @@
 
   <gazebo>
     <plugin name="alpha_ceres_diff_drive" filename="libgazebo_ros_diff_drive.so">
-      <update_rate>15</update_rate>
+      <update_rate>60</update_rate>
       
       <!-- wheels -->
       <!-- Have to switch right and left due to mistake in urdf-->
@@ -457,16 +457,16 @@
       <right_joint>left_drive_wheel_joint_1</right_joint>
  
       <!-- kinematics -->
-      <wheel_separation>0.95</wheel_separation>
-      <wheel_diameter>0.42</wheel_diameter>
+      <wheel_separation>-0.95</wheel_separation>
+      <wheel_diameter>-0.42</wheel_diameter>
  
       <!-- limits -->
-      <max_wheel_torque>200</max_wheel_torque>
+      <max_wheel_torque>400</max_wheel_torque>
       <max_wheel_acceleration>1.0</max_wheel_acceleration>
  
       <!-- Receive velocity commands on this ROS topic -->
       <command_topic>cmd_vel</command_topic>
- 
+
       <!-- output -->
       <!-- When false, publish no wheel odometry data to a ROS topic -->
       <publish_odom>true</publish_odom>
@@ -479,11 +479,14 @@
       <!-- The robot_state_publisher package is often used to publish this transform -->  
       <publish_wheel_tf>true</publish_wheel_tf>
 
-      <odometry_topic>odom</odometry_topic>
+      <odometry_topic>/odom</odometry_topic>
       <odometry_frame>odom</odometry_frame>
       <robot_base_frame>base_link</robot_base_frame>
  
       <odometry_source>1</odometry_source>
+      <ros>
+        <remap>odom:=wheel/odometry</remap>
+      </ros>
     </plugin>
   </gazebo>
 </robot>

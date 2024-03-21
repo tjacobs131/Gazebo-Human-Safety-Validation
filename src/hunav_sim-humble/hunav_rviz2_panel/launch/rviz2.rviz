@@ -111,6 +111,10 @@ Visualization Manager:
       Color: 160; 160; 164
       Enabled: true
       Name: Path
+      Pose Style: Arrows
+      Pose Color: 143; 240; 164
+      Shaft Diameter: 0.08
+      Head Diameter: 0.15
       Topic:
         Depth: 5
         Durability Policy: Volatile

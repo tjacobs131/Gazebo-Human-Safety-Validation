@@ -251,7 +251,7 @@ def generate_launch_description():
 
     simulation_bridge = Node(
         package='simulation_bridge',
-        executable='simulation_bridge'
+        executable='simulation_bridge',
     )
     
     joy_node = Node(

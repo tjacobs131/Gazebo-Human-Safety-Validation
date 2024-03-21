@@ -1,4 +1,3 @@
-import math
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
@@ -13,19 +12,15 @@ class SimulationBridge(Node):
         self.vel_pub = self.create_publisher(Twist, "/cmd_vel", 5)
 
         # Set up subscribers
-        # self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 10)
+        self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 10)
 
         self.get_logger().info("Started Simulation Bridge")
-
         self.logger = self.get_logger()
-
-        # start = time.time()
-        # while time.time() - start < 12:
-        #     pass
 
         self.start()
 
     def _odometry(self, msg):
+
         self.logger.info("\n\n----- Odometry -----\n")
 
         # Position
