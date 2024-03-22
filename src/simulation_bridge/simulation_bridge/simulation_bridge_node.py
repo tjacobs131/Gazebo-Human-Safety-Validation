@@ -1,8 +1,8 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, PoseStamped
 from nav_msgs.msg import Odometry
-import time
+from time import sleep
 
 class SimulationBridge(Node):
 
@@ -10,9 +10,18 @@ class SimulationBridge(Node):
         super().__init__('simulation_bridge')
         # Set up publisher
         self.vel_pub = self.create_publisher(Twist, "/cmd_vel", 5)
+        self.goal_pub = self.create_publisher(PoseStamped, "/goal_pose", 1)
 
         # Set up subscribers
         self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 10)
+        # Set up subscriber for move_base result
+        # self.move_base_result_sub = self.create_subscription(
+        #     MoveBaseResult,
+        #     "/move_base/result",
+        #     self.move_base_result_callback,
+        #     10
+        # )
+        self.planner_sub = self.create_subscription(PoseStamped, "/compute_path_to_pose/_action/status", self._planner, 10)
 
         self.get_logger().info("Started Simulation Bridge")
         self.logger = self.get_logger()
@@ -55,6 +64,33 @@ class SimulationBridge(Node):
 
     def start(self):
         self.logger.info("Starting")
+        
+        # Send nav goal
+        goal = PoseStamped()
+        goal.header.frame_id = "map"
+        goal.pose.position.x = 5.0
+        goal.pose.position.y = 5.0
+        goal.pose.position.z = 0.0
+        goal.pose.orientation.x = 0.0
+        goal.pose.orientation.y = 0.0
+        goal.pose.orientation.z = 0.0
+        goal.pose.orientation.w = 1.0
+
+        sleep(10)
+
+        self.goal_pub.publish(goal)
+
+        # goal_received = False
+        # while not goal_received:
+        #     self.goal_pub.publish(goal) 
+        #     # You might want to add a small delay here to avoid flooding the topic
+        #     time.sleep(0.1)
+
+        #     # Check if goal has been received
+        #     if self.goal_received:
+        #         goal_received = True
+        #         self.logger.info("Goal received!")
+
 
 
 def main(args=None):

@@ -115,6 +115,8 @@ Visualization Manager:
       Pose Color: 143; 240; 164
       Shaft Diameter: 0.08
       Head Diameter: 0.15
+      Shaft Length: 0.1
+      Head Length: 0.05
       Topic:
         Depth: 5
         Durability Policy: Volatile
