@@ -36,6 +36,7 @@ link_directories(
 )
 
 include_directories("/models")
+include_directories("/params")
 
 
 add_library(HuNavPlugin SHARED src/HuNavPlugin.cpp)
@@ -81,6 +82,11 @@ install(DIRECTORY worlds/
 install(DIRECTORY media/models
    DESTINATION share/${PROJECT_NAME}/
 )
+
+install(DIRECTORY params/
+   DESTINATION share/${PROJECT_NAME}/params
+)
+
 # install(DIRECTORY media/models/textures
 #    DESTINATION share/${PROJECT_NAME}/textures
 # )
