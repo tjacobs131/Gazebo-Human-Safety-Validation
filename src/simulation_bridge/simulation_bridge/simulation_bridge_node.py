@@ -3,10 +3,12 @@ import subprocess
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist, PoseStamped
-from nav_msgs.msg import Odometry
+from nav_msgs.msg import Odometry, Path
 from time import sleep
 
 class SimulationBridge(Node):
+
+    received_path = False
 
     def __init__(self):
         super().__init__('simulation_bridge')
@@ -16,14 +18,7 @@ class SimulationBridge(Node):
 
         # Set up subscribers
         self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 1)
-        # Set up subscriber for move_base result
-        # self.move_base_result_sub = self.create_subscription(
-        #     MoveBaseResult,
-        #     "/move_base/result",
-        #     self.move_base_result_callback,
-        #     10
-        # )
-        # self.planner_sub = self.create_subscription(PoseStamped, "/compute_path_to_pose/_action/status", self._planner, 10)
+        self.planned_path = self.create_subscription(Path, "planned_path", self._planned_path, 1)
 
         self.get_logger().info("Started Simulation Bridge")
         self.logger = self.get_logger()
@@ -59,6 +54,10 @@ class SimulationBridge(Node):
         + f"  y: {angular_velocity.y:.3f}\n"
         + f"  z: {angular_velocity.z:.3f}\n")
 
+    def _planned_path(self, msg):
+        self.logger.info("Planned path received")
+        self.received_path = True
+
 
     def start(self):
         self.logger.info("Starting")
@@ -69,23 +68,11 @@ class SimulationBridge(Node):
         goal.pose.position.x = 5.0
         goal.pose.position.y = 5.0
         goal.pose.orientation.w = 1.0
-        
-        sleep(2)
 
-        self.goal_pub.publish(goal)
-
-        # goal_received = False
-        # while not goal_received:
-        #     self.goal_pub.publish(goal) 
-        #     # You might want to add a small delay here to avoid flooding the topic
-        #     time.sleep(0.1)
-
-        #     # Check if goal has been received
-        #     if self.goal_received:
-        #         goal_received = True
-        #         self.logger.info("Goal received!")
-
-
+        while(not self.received_path):
+            self.goal_pub.publish(goal)
+            sleep(0.5)
+            rclpy.spin_once(self)
 
 def main():
     if is_node_running('simulation_bridge'):
