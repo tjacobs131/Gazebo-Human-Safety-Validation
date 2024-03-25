@@ -249,9 +249,12 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(pkg_share + '/launch/nav2_bringup.launch.py')
     )
 
-    simulation_bridge = Node(
-        package='simulation_bridge',
-        executable='simulation_bridge',
+    simulation_bridge = ExecuteProcess(
+        cmd=['gnome-terminal', '--', 
+             'ros2', 'run', 
+             'simulation_bridge', 'simulation_bridge'],
+        name='simulation_bridge',
+        output='screen'
     )
     
     joy_node = Node(

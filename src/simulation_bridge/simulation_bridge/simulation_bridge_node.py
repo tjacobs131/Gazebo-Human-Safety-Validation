@@ -1,3 +1,5 @@
+import curses
+import subprocess
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist, PoseStamped
@@ -21,7 +23,7 @@ class SimulationBridge(Node):
         #     self.move_base_result_callback,
         #     10
         # )
-        self.planner_sub = self.create_subscription(PoseStamped, "/compute_path_to_pose/_action/status", self._planner, 10)
+        # self.planner_sub = self.create_subscription(PoseStamped, "/compute_path_to_pose/_action/status", self._planner, 10)
 
         self.get_logger().info("Started Simulation Bridge")
         self.logger = self.get_logger()
@@ -29,37 +31,33 @@ class SimulationBridge(Node):
         self.start()
 
     def _odometry(self, msg):
-
-        self.logger.info("\n\n----- Odometry -----\n")
-
-        # Position
         position = msg.pose.pose.position
-        self.logger.info("Position:")
-        self.logger.info(f"  x: {position.x:.3f}")
-        self.logger.info(f"  y: {position.y:.3f}")
-        self.logger.info(f"  z: {position.z:.3f}")
-
-        # Orientation (quaternion)
         orientation = msg.pose.pose.orientation
-        self.logger.info("Orientation (quaternion):")
-        self.logger.info(f"  x: {orientation.x:.3f}")
-        self.logger.info(f"  y: {orientation.y:.3f}")
-        self.logger.info(f"  z: {orientation.z:.3f}")
-        self.logger.info(f"  w: {orientation.w:.3f}")
-
-        # Linear Velocity
         linear_velocity = msg.twist.twist.linear
-        self.logger.info("Linear Velocity:")
-        self.logger.info(f"  x: {linear_velocity.x:.3f}")
-        self.logger.info(f"  y: {linear_velocity.y:.3f}")
-        self.logger.info(f"  z: {linear_velocity.z:.3f}")
-
-        # Angular Velocity
         angular_velocity = msg.twist.twist.angular
-        self.logger.info("Angular Velocity:")
-        self.logger.info(f"  x: {angular_velocity.x:.3f}")
-        self.logger.info(f"  y: {angular_velocity.y:.3f}")
-        self.logger.info(f"  z: {angular_velocity.z:.3f}")
+
+        self.logger.info("\n\n----- Odometry -----\n\n"
+
+        + "Position:\n"
+        + f"  x: {position.x:.3f}\n"
+        + f"  y: {position.y:.3f}\n"
+        + f"  z: {position.z:.3f}\n"
+        
+        + "Orientation (quaternion):\n"
+        + f"  x: {orientation.x:.3f}\n"
+        + f"  y: {orientation.y:.3f}\n"
+        + f"  z: {orientation.z:.3f}\n"
+        + f"  w: {orientation.w:.3f}\n"
+        
+        + "Linear Velocity:\n"
+        + f"  x: {linear_velocity.x:.3f}\n"
+        + f"  y: {linear_velocity.y:.3f}\n"
+        + f"  z: {linear_velocity.z:.3f}\n"
+        
+        + "Angular Velocity:\n"
+        + f"  x: {angular_velocity.x:.3f}\n" 
+        + f"  y: {angular_velocity.y:.3f}\n"
+        + f"  z: {angular_velocity.z:.3f}\n")
 
 
     def start(self):
@@ -70,10 +68,6 @@ class SimulationBridge(Node):
         goal.header.frame_id = "map"
         goal.pose.position.x = 5.0
         goal.pose.position.y = 5.0
-        goal.pose.position.z = 0.0
-        goal.pose.orientation.x = 0.0
-        goal.pose.orientation.y = 0.0
-        goal.pose.orientation.z = 0.0
         goal.pose.orientation.w = 1.0
 
         sleep(10)
@@ -93,8 +87,12 @@ class SimulationBridge(Node):
 
 
 
-def main(args=None):
-    rclpy.init(args=args)
+def main():
+    if is_node_running('simulation_bridge'):
+        print("Node already running")
+        raise SystemExit
+
+    rclpy.init()
 
     simulation_bridge = SimulationBridge()
 
@@ -103,6 +101,6 @@ def main(args=None):
     simulation_bridge.destroy_node()
     rclpy.shutdown()
 
-
-if __name__ == '__main__':
-    main()
+def is_node_running(node_name):
+    result = subprocess.run(['ros2', 'node', 'list'], stdout=subprocess.PIPE)
+    return node_name in result.stdout.decode('utf-8')
