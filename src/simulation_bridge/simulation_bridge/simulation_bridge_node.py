@@ -67,7 +67,8 @@ class SimulationBridge(Node):
         goal.header.frame_id = "map"
         goal.pose.position.x = 5.0
         goal.pose.position.y = 5.0
-        goal.pose.orientation.w = 1.0
+        goal.pose.orientation.z = 1.0
+        goal.pose.orientation.w = -1.0
 
         while(not self.received_path):
             self.goal_pub.publish(goal)
