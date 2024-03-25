@@ -130,6 +130,14 @@ Visualization Manager:
       Enabled: true
       Name: TF
 
+    - Alpha: 0.75
+      Class: rviz_default_plugins/Odometry
+      Keep: 20
+      Covariance: False
+      Enabled: true
+      Topic: /odom
+      Name: Odometry
+
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

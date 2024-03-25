@@ -15,7 +15,7 @@ class SimulationBridge(Node):
         self.goal_pub = self.create_publisher(PoseStamped, "/goal_pose", 1)
 
         # Set up subscribers
-        self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 10)
+        self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 1)
         # Set up subscriber for move_base result
         # self.move_base_result_sub = self.create_subscription(
         #     MoveBaseResult,
@@ -69,8 +69,8 @@ class SimulationBridge(Node):
         goal.pose.position.x = 5.0
         goal.pose.position.y = 5.0
         goal.pose.orientation.w = 1.0
-
-        sleep(10)
+        
+        sleep(2)
 
         self.goal_pub.publish(goal)
 

@@ -13,6 +13,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (PathJoinSubstitution, LaunchConfiguration, 
                             PythonExpression, EnvironmentVariable)
 from launch_ros.actions import Node
+from launch.actions import TimerAction
 from launch_ros.substitutions import FindPackageShare
 from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
                                 OnProcessIO, OnProcessStart, OnShutdown)
@@ -249,12 +250,17 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(pkg_share + '/launch/nav2_bringup.launch.py')
     )
 
-    simulation_bridge = ExecuteProcess(
-        cmd=['gnome-terminal', '--', 
-             'ros2', 'run', 
-             'simulation_bridge', 'simulation_bridge'],
-        name='simulation_bridge',
-        output='screen'
+    simulation_bridge = TimerAction(
+        period=7.0,
+        actions=[
+            ExecuteProcess(
+                cmd=['gnome-terminal', '--geometry=60x24+2560+0', '--',
+                    'ros2', 'run', 
+                    'simulation_bridge', 'simulation_bridge'],
+                name='simulation_bridge',
+                output='screen'
+            )
+        ]
     )
     
     joy_node = Node(
