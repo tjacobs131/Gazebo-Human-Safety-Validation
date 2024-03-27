@@ -26,7 +26,7 @@ def generate_launch_description():
         '__GLX_VENDOR_LIBRARY_NAME=nvidia ',
     ]
 
-    robot_name_in_model = 'ceres_alpha'
+    robot_name_in_model = 'pmb2'
 
     # Pose where we want to spawn the robot
     spawn_x_val = '0.0'
@@ -258,6 +258,7 @@ def generate_launch_description():
                     'ros2', 'run', 
                     'simulation_bridge', 'simulation_bridge'],
                 name='simulation_bridge',
+                
                 output='screen'
             )
         ]
@@ -290,6 +291,10 @@ def generate_launch_description():
                         '-z', spawn_z_val,
                         '-Y', spawn_yaw_val],
                         output='screen')
+    
+    pmb2_bringup = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(pkg_share + '/launch/pmb2_pal.launch.py')
+    )
 
     # DO NOT Launch this if any robot localization is launched
     static_tf_node = Node(
@@ -329,7 +334,7 @@ def generate_launch_description():
         description='Update rate of the plugin'
     )
     declare_robot_name = DeclareLaunchArgument(
-        'robot_name', default_value='ceres_alpha',
+        'robot_name', default_value='pmb2',
         description='Specify the name of the robot Gazebo model'
     )
     declare_frame_to_publish = DeclareLaunchArgument(
