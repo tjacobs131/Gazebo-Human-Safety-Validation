@@ -250,18 +250,25 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(pkg_share + '/launch/nav2_bringup.launch.py')
     )
 
-    simulation_bridge = TimerAction(
+    odometry_readout = TimerAction(
         period=7.0,
         actions=[
             ExecuteProcess(
                 cmd=['gnome-terminal', '--geometry=60x24+2560+0', '--',
                     'ros2', 'run', 
-                    'simulation_bridge', 'simulation_bridge'],
-                name='simulation_bridge',
+                    'odometry_readout', 'odometry_readout_node'],
+                name='odometry_readout',
                 
                 output='screen'
             )
         ]
+    )
+
+    simulation_bridge = Node(
+        package='simulation_bridge',
+        executable='simulation_bridge',
+        name='simulation_bridge',
+        output='screen'
     )
     
     joy_node = Node(
@@ -376,6 +383,8 @@ def generate_launch_description():
     ld.add_action(hunav_rviz2)
 
     ld.add_action(simulation_bridge)
+    ld.add_action(odometry_readout)
+
     ld.add_action(declare_urdf_model_path_cmd)
     ld.add_action(spawn_entity_cmd)
 

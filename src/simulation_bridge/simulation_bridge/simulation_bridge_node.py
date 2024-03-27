@@ -40,35 +40,7 @@ class SimulationBridge(Node):
             self.standing_still_time += 1
         else: 
             self.standing_still_time = 0
-
-        position = msg.pose.pose.position
-        orientation = msg.pose.pose.orientation
-        linear_velocity = msg.twist.twist.linear
-        angular_velocity = msg.twist.twist.angular
-
-        self.logger.info("\n\n----- Odometry -----\n\n"
-
-        + "Position:\n"
-        + f"  x: {position.x:.3f}\n"
-        + f"  y: {position.y:.3f}\n"
-        + f"  z: {position.z:.3f}\n"
-        
-        + "Orientation (quaternion):\n"
-        + f"  x: {orientation.x:.3f}\n"
-        + f"  y: {orientation.y:.3f}\n"
-        + f"  z: {orientation.z:.3f}\n"
-        + f"  w: {orientation.w:.3f}\n"
-        
-        + "Linear Velocity:\n"
-        + f"  x: {linear_velocity.x:.3f}\n"
-        + f"  y: {linear_velocity.y:.3f}\n"
-        + f"  z: {linear_velocity.z:.3f}\n"
-        
-        + "Angular Velocity:\n"
-        + f"  x: {angular_velocity.x:.3f}\n" 
-        + f"  y: {angular_velocity.y:.3f}\n"
-        + f"  z: {angular_velocity.z:.3f}\n")
-
+            
     def _planned_path(self, msg):
         if not self.received_path:
             self.logger.info("Planned path received")
