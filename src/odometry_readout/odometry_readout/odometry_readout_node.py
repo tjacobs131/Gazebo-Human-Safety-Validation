@@ -58,6 +58,10 @@ class OdometryReadout(Node):
 
 
 def main():
+    if is_node_running('odometry_readout'):
+        print("Node already running")
+        raise SystemExit
+
     rclpy.init()
 
     odometry_readout = OdometryReadout()
@@ -66,3 +70,7 @@ def main():
 
     odometry_readout.destroy_node()
     rclpy.shutdown()
+
+def is_node_running(node_name):
+    result = subprocess.run(['ros2', 'node', 'list'], stdout=subprocess.PIPE)
+    return node_name in result.stdout.decode('utf-8') 
