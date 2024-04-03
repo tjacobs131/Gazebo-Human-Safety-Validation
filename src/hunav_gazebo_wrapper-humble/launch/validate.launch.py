@@ -43,7 +43,11 @@ def generate_launch_description():
     joystick_config = FindPackageShare(package='teleop_twist_joy').find('teleop_twist_joy')
     joystick_config = os.path.join(joystick_config, 'config/xbox.config.yaml') 
 
-    goals_config = pkg_share + '/params/goals.yaml'
+    goal_params = DeclareLaunchArgument(
+        'goals',
+        description='Path to the goal configuration file')
+    
+    goals_config = LaunchConfiguration('goals')
 
     # World generation parameters
     urdf_model = LaunchConfiguration('urdf_model')
@@ -321,7 +325,7 @@ def generate_launch_description():
         description='Absolute path to robot urdf file')
 
     declare_agents_conf_file = DeclareLaunchArgument(
-        'configuration_file', default_value='agents.yaml',
+        'configuration_file',
         description='Specify configuration file name in the cofig directory'
     )
 

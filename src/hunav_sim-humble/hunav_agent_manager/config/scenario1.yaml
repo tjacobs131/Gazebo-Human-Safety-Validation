@@ -1,0 +1,31 @@
+hunav_loader:
+  ros__parameters:
+    map: simple
+    publish_people: true
+    agents:
+      - agent1
+    agent1:
+      id: 1
+      skin: 0
+      behavior: 1
+      group_id: -1
+      max_vel: 1.5
+      radius: 0.4
+      init_pose:
+        x: -4.155396
+        y: 4.803797
+        z: 1.250000
+        h: 0.0
+      goal_radius: 0.3
+      cyclic_goals: true
+      goals:
+        - g0
+        - g1
+      g0:
+        x: 6.125517
+        y: 5.700662
+        h: 1.250000
+      g1:
+        x: 1.632029
+        y: 9.051845
+        h: 1.250000

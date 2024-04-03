@@ -31,22 +31,23 @@ class SimulationBridge(Node):
     def __init__(self):
         super().__init__('simulation_bridge')
 
-        # Load goals from parameter file
+        self.logger = self.get_logger()
+        self.logger.info("Started Simulation Bridge")
 
+        # Get parameter file
         self.declare_parameter(name="params_file", value="goals.yaml")
         self.param = self.get_parameter(name="params_file").value
-
         if self.param is None:
-            self.get_logger().error("No goals parameter found")
-            raise ValueError("No goals parameter found")
+            self.logger.error("No goals parameter found")
         else:
-            self.get_logger().info(f"Using parameter file: {self.param}")
+            self.logger.info(f"Using parameter file: {self.param}")
 
+        # Load goals from parameter file
         with open(self.param, "r") as file:
             config = yaml.safe_load(file)
             goals = config["/simulation_bridge"]["ros__parameters"]["goals"]
             if goals is None:
-                self.get_logger().error("No goals found in parameter file")
+                self.logger.error("No goals found in parameter file")
                 raise ValueError("No goals found in parameter file")
             else:
                 try:
@@ -55,19 +56,15 @@ class SimulationBridge(Node):
                         self.movement_goals.append(self.Goal(goal["x_pos"], goal["y_pos"], goal["yaw"]))
                 except KeyError:
                     pass
+        self.logger.info(f"Goals: {self.movement_goals}")
 
-        self.get_logger().info(f"Goals: {self.movement_goals}")
-
-        # Set up publisher
+        # Set up publishers
         self.vel_pub = self.create_publisher(Twist, "/cmd_vel", 5)
         self.goal_pub = self.create_publisher(PoseStamped, "/goal_pose", 1)
 
         # Set up subscribers
         self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 1)
         self.planned_path = self.create_subscription(Path, "plan", self._planned_path, 1)
-
-        self.get_logger().info("Started Simulation Bridge")
-        self.logger = self.get_logger()
 
         self.start()
 
@@ -80,6 +77,7 @@ class SimulationBridge(Node):
             self.standing_still_time = 0
             
     def _planned_path(self, msg):
+        # Confirm that the planned goal has been turned into a path
         if not self.received_path:
             self.logger.info("Planned path received")
             self.received_path = True
@@ -109,10 +107,10 @@ class SimulationBridge(Node):
             rclpy.spin_once(self)
         
     def reached_goal(self, x, y):
-        # Check odometry to see if the robot has reached the goal within tolerance
         if self.position is None:
             return False
         
+        # Check odometry to see if the robot has reached the goal within tolerance
         if (abs(self.position.x - x) < self.xy_tolerance and abs(self.position.y - y) < self.xy_tolerance # Check position
                 and self.standing_still_time > self.standing_still_time_threshold): # Check if the robot is not rotating
                 return True
@@ -127,6 +125,7 @@ class SimulationBridge(Node):
             sleep(0.1)
 
     def start(self):
+        # Iterate through the goals and move to each one
         for goal in self.movement_goals:
             self.logger.info(f"Moving to goal: {goal}")
             self.move_to_goal(goal.x, goal.y, goal.yaw)
