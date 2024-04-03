@@ -43,6 +43,8 @@ def generate_launch_description():
     joystick_config = FindPackageShare(package='teleop_twist_joy').find('teleop_twist_joy')
     joystick_config = os.path.join(joystick_config, 'config/xbox.config.yaml') 
 
+    goals_config = pkg_share + '/params/goals.yaml'
+
     # World generation parameters
     urdf_model = LaunchConfiguration('urdf_model')
     world_file_name = LaunchConfiguration('base_world')
@@ -220,7 +222,6 @@ def generate_launch_description():
         executable='robot_state_publisher',
         name='robot_state_publisher',
         parameters=[{'robot_description': robot_desc}],
-        
     )
 
     metrics_file = PathJoinSubstitution([
@@ -268,6 +269,7 @@ def generate_launch_description():
         package='simulation_bridge',
         executable='simulation_bridge',
         name='simulation_bridge',
+        parameters=[{"params_file": goals_config}],
         output='screen'
     )
     

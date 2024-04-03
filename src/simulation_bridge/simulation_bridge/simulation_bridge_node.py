@@ -1,6 +1,7 @@
 import curses
 import math
 import subprocess
+import yaml
 from timeit import default_timer
 import rclpy
 from rclpy.node import Node
@@ -8,18 +9,55 @@ from geometry_msgs.msg import Twist, PoseStamped
 from nav_msgs.msg import Odometry, Path
 from nav2_msgs.action import NavigateToPose
 from time import sleep, time
+from dataclasses import dataclass
 
 class SimulationBridge(Node):
+
+    @dataclass
+    class Goal:
+        x: float
+        y: float
+        yaw: float
 
     received_path = False
 
     xy_tolerance = 0.85
     yaw_tolerance = 0.40
     standing_still_time = 0
-    standing_still_time_threshold = 4 # The amount of odometry messages to confirm that the robot is standing still
+    standing_still_time_threshold = 4 # The amount of odometry messages to confirm that the robot is standing still\
+
+    movement_goals = []
 
     def __init__(self):
         super().__init__('simulation_bridge')
+
+        # Load goals from parameter file
+
+        self.declare_parameter(name="params_file", value="goals.yaml")
+        self.param = self.get_parameter(name="params_file").value
+
+        if self.param is None:
+            self.get_logger().error("No goals parameter found")
+            raise ValueError("No goals parameter found")
+        else:
+            self.get_logger().info(f"Using parameter file: {self.param}")
+
+        with open(self.param, "r") as file:
+            config = yaml.safe_load(file)
+            goals = config["/simulation_bridge"]["ros__parameters"]["goals"]
+            if goals is None:
+                self.get_logger().error("No goals found in parameter file")
+                raise ValueError("No goals found in parameter file")
+            else:
+                try:
+                    while True:
+                        goal = goals["goal" + str(len(self.movement_goals))]
+                        self.movement_goals.append(self.Goal(goal["x_pos"], goal["y_pos"], goal["yaw"]))
+                except KeyError:
+                    pass
+
+        self.get_logger().info(f"Goals: {self.movement_goals}")
+
         # Set up publisher
         self.vel_pub = self.create_publisher(Twist, "/cmd_vel", 5)
         self.goal_pub = self.create_publisher(PoseStamped, "/goal_pose", 1)
@@ -89,21 +127,12 @@ class SimulationBridge(Node):
             sleep(0.1)
 
     def start(self):
-        self.logger.info("Starting")
-
-        self.move_to_goal(-2.0, 2.0, 1.0)
-
-        self.move_to_goal(2.0, 2.0, -0.71)
-        
-        self.move_to_goal(2.0, -2.0, -1.0)
-
-        self.move_to_goal(-2.0, -2.0, 1.0)
+        for goal in self.movement_goals:
+            self.logger.info(f"Moving to goal: {goal}")
+            self.move_to_goal(goal.x, goal.y, goal.yaw)
+            self.logger.info("Goal reached")
 
 def main():
-    if is_node_running('simulation_bridge'):
-        print("Node already running")
-        raise SystemExit
-
     rclpy.init()
 
     simulation_bridge = SimulationBridge()
@@ -112,7 +141,3 @@ def main():
 
     simulation_bridge.destroy_node()
     rclpy.shutdown()
-
-def is_node_running(node_name):
-    result = subprocess.run(['ros2', 'node', 'list'], stdout=subprocess.PIPE)
-    return node_name in result.stdout.decode('utf-8')
