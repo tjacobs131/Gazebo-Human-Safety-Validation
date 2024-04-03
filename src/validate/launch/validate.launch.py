@@ -36,9 +36,9 @@ def generate_launch_description():
 
     pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')
     # Set the path to this package.
-    pkg_share = FindPackageShare(package='hunav_gazebo_wrapper').find('hunav_gazebo_wrapper')
+    hunav_gazebo_pkg_share = FindPackageShare(package='hunav_gazebo_wrapper').find('hunav_gazebo_wrapper')
     
-    default_urdf_model_path = os.path.join(pkg_share, 'models/ceres_alpha.urdf')
+    default_urdf_model_path = os.path.join(hunav_gazebo_pkg_share, 'models/ceres_alpha.urdf')
 
     joystick_config = FindPackageShare(package='teleop_twist_joy').find('teleop_twist_joy')
     joystick_config = os.path.join(joystick_config, 'config/xbox.config.yaml') 
@@ -118,7 +118,7 @@ def generate_launch_description():
     ])
 
     config_file_name = 'params.yaml' 
-    config_file = path.join(pkg_share, 'launch', config_file_name)
+    config_file = path.join(hunav_gazebo_pkg_share, 'launch', config_file_name)
     
     model, plugin, media = GazeboRosPaths.get_paths()
     #print('model:', model)
@@ -217,7 +217,7 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}]
     )
     
-    urdf_path = os.path.join(pkg_share + "/models/ceres_alpha.urdf")
+    urdf_path = os.path.join(hunav_gazebo_pkg_share + "/models/ceres_alpha.urdf")
     with open(urdf_path, 'r') as infp:
         robot_desc = infp.read()
 
@@ -248,7 +248,7 @@ def generate_launch_description():
     )
     
     nav2_bringup = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(pkg_share + '/launch/nav2_bringup.launch.py')
+        PythonLaunchDescriptionSource(hunav_gazebo_pkg_share + '/launch/nav2_bringup.launch.py')
     )
 
     odometry_readout = TimerAction(
@@ -302,7 +302,7 @@ def generate_launch_description():
                         output='screen')
     
     pmb2_bringup = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(pkg_share + '/launch/pmb2_pal.launch.py')
+        PythonLaunchDescriptionSource(hunav_gazebo_pkg_share + '/launch/pmb2_pal.launch.py')
     )
 
     # DO NOT Launch this if any robot localization is launched

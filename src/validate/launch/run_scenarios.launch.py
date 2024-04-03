@@ -9,7 +9,7 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node  
 
 def generate_launch_description():
-    pkg_share = get_package_share_directory('hunav_gazebo_wrapper')
+    pkg_share = get_package_share_directory('validate')
 
     goal_params = DeclareLaunchArgument(
         'goals',
