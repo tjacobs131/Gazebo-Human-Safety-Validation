@@ -1,0 +1,4 @@
+minimum_distance_to_people: 0.0
+intimate_space_intrusions: 38.73873873873874
+personal_space_intrusions: 22.07207207207207
+robot_on_person_collision: 9

@@ -272,6 +272,13 @@ def generate_launch_description():
         parameters=[{"params_file": goals_config}],
         output='screen'
     )
+
+    metrics_processor = Node(
+        package='metrics_processor',
+        executable='process_metrics',
+        name='metrics_processor',
+        output='screen'
+    )
     
     joy_node = Node(
         package='joy', executable='joy_node', name='joy_node',
@@ -385,6 +392,7 @@ def generate_launch_description():
     ld.add_action(hunav_rviz2)
 
     ld.add_action(simulation_bridge)
+    ld.add_action(metrics_processor)
     ld.add_action(odometry_readout)
 
     ld.add_action(declare_urdf_model_path_cmd)

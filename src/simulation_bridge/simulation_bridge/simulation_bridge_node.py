@@ -10,6 +10,7 @@ from nav_msgs.msg import Odometry, Path
 from nav2_msgs.action import NavigateToPose
 from time import sleep, time
 from dataclasses import dataclass
+from std_msgs.msg import Bool
 
 class SimulationBridge(Node):
 
@@ -34,6 +35,20 @@ class SimulationBridge(Node):
         self.logger = self.get_logger()
         self.logger.info("Started Simulation Bridge")
 
+        self.load_goals()
+
+        # Set up publishers
+        self.vel_pub = self.create_publisher(Twist, "/cmd_vel", 5)
+        self.goal_pub = self.create_publisher(PoseStamped, "/goal_pose", 1)
+        self.done_pub = self.create_publisher(Bool, "robot_done", 1)
+
+        # Set up subscribers
+        self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 1)
+        self.planned_path = self.create_subscription(Path, "plan", self._planned_path, 1)
+
+        self.start()
+
+    def load_goals(self):
         # Get parameter file
         self.declare_parameter(name="params_file", value="goals.yaml")
         self.param = self.get_parameter(name="params_file").value
@@ -57,16 +72,6 @@ class SimulationBridge(Node):
                 except KeyError:
                     pass
         self.logger.info(f"Goals: {self.movement_goals}")
-
-        # Set up publishers
-        self.vel_pub = self.create_publisher(Twist, "/cmd_vel", 5)
-        self.goal_pub = self.create_publisher(PoseStamped, "/goal_pose", 1)
-
-        # Set up subscribers
-        self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 1)
-        self.planned_path = self.create_subscription(Path, "plan", self._planned_path, 1)
-
-        self.start()
 
     def _odometry(self, msg):
         # Store odometry data to be used in the move_to_goal function
@@ -130,6 +135,12 @@ class SimulationBridge(Node):
             self.logger.info(f"Moving to goal: {goal}")
             self.move_to_goal(goal.x, goal.y, goal.yaw)
             self.logger.info("Goal reached")
+            if goal == self.movement_goals[-1]:
+                self.logger.info("All goals reached")
+                msg = Bool()
+                msg.data = True
+                self.done_pub.publish(msg)
+
 
 def main():
     rclpy.init()

@@ -20,11 +20,9 @@ def generate_launch_description():
         'configuration_file', default_value='scenario1.yaml',
         description='Specify configuration file name in the config directory'
     )
-
-
-    # include secondary launch file that takes in the platform argument
+    
     validate = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([get_package_share_directory('hunav_gazebo_wrapper'), '/launch/validate.launch.py']),
+        PythonLaunchDescriptionSource([pkg_share, '/launch/validate.launch.py']),
         launch_arguments=[('goals', LaunchConfiguration('goals')), ('configuration_file', LaunchConfiguration('configuration_file'))],
     )
 
