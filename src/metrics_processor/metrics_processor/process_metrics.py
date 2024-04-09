@@ -9,6 +9,7 @@ import rclpy
 from rclpy.node import Node
 from time import sleep, time
 from std_msgs.msg import Bool
+from std_srvs.srv import Trigger
 
 class MetricsProcessor(Node):
 
@@ -20,9 +21,11 @@ class MetricsProcessor(Node):
         self.logger = self.get_logger()
         self.logger.info("Started Metrics Processor")
 
-        self.done_sub = self.create_subscription(Bool, 'robot_done', self.__done_callback, 1)
+        self.recording_srv = self.create_service(Trigger, 'hunav_trigger_recording', self.__recording_callback)
 
     def start(self):
+        sleep(2) # Give hunav_evaluator time to save metrics file
+
         # Get metrics file from base workspace directory
         metrics_path = os.path.realpath(os.path.join(get_package_share_directory("metrics_processor"), '../../../..', 'metrics.txt'))
         safety_metrics = {}
@@ -35,23 +38,25 @@ class MetricsProcessor(Node):
                 variables = metrics.split("\n")[0].split("\t")
                 values = metrics.split("\n")[1].split("\t")
 
-                self.logger.info(f"Variables: {variables}")
-                self.logger.info(f"Values: {values}")
-
+                self.logger.info("Saving safety metrics")
                 for i in range(len(variables)):
                     if variables[i] in self.target_variables:
+                        self.logger.info(f"{variables[i]}: {values[i]}")
                         safety_metrics[variables[i]] = values[i]                
 
         # Store metrics in a new file
         metrics_path = os.path.realpath(os.path.join(get_package_share_directory("metrics_processor"), '../../../..', 'safety_metrics.txt'))
         with open(metrics_path, "w") as file:
             for key in safety_metrics:
-                self.logger.info(f"{key}: {safety_metrics[key]}")
                 file.write(f"{key}: {safety_metrics[key]}\n")
 
-    def __done_callback(self, msg):
-        if msg.data == True:
-            self.start()
+    def __recording_callback(self, request, response):
+        response.success = True
+        response.message = "Recording started"
+
+        self.start()
+
+        return response
 
 
 def main():

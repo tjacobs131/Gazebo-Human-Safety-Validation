@@ -11,6 +11,7 @@ from nav2_msgs.action import NavigateToPose
 from time import sleep, time
 from dataclasses import dataclass
 from std_msgs.msg import Bool
+from std_srvs.srv import Trigger
 
 class SimulationBridge(Node):
 
@@ -45,6 +46,9 @@ class SimulationBridge(Node):
         # Set up subscribers
         self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 1)
         self.planned_path = self.create_subscription(Path, "plan", self._planned_path, 1)
+
+        # Set up stop evaluation client
+        self.eval_client = self.create_client(Trigger, 'hunav_trigger_recording')
 
         self.start()
 
@@ -135,10 +139,15 @@ class SimulationBridge(Node):
             self.logger.info(f"Moving to goal: {goal}")
             self.move_to_goal(goal.x, goal.y, goal.yaw)
             self.logger.info("Goal reached")
+            
             if goal == self.movement_goals[-1]:
                 self.logger.info("All goals reached")
                 msg = Bool()
                 msg.data = True
+                self.eval_client.wait_for_service()
+                request = Trigger.Request()
+                self.eval_client.call(request)
+                
                 self.done_pub.publish(msg)
 
 

@@ -17,10 +17,10 @@ ARGS = [
     # 2- (DEFAULT) The recording start/stop process is automatic.
     #    It starts when the first topic is received.
     #    It stops when a certain time pass without receiving data.
-    # DeclareLaunchArgument(
-    #     'mode', default_value='2',
-    #     description='Specify working mode (1 or 2)'
-    # ),
+    DeclareLaunchArgument(
+        'mode', default_value='1',
+        description='Specify working mode (1 or 2)'
+    ),
     DeclareLaunchArgument(
         'metrics_file', default_value='metrics.yaml',
         description='Specify the name of the metrics configuration file in the cofig directory'

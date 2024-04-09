@@ -1,3 +1,4 @@
+from time import sleep
 import numpy as np
 import sys
 import os
@@ -15,6 +16,8 @@ class HunavEvaluatorNode(Node):
 
     def __init__(self):
         super().__init__("hunav_evaluator_node")
+
+        self.init=False
         
         name = 'hunav_evaluator'
         self.agents_list = []
@@ -30,7 +33,7 @@ class HunavEvaluatorNode(Node):
         # 2- The recording start/stop process is semi-automatic:
         #    It starts when the first topic is received or a navigation goal is received.
         #    It stops when a certain time pass without receiving data. 
-        self.mode = self.declare_parameter('mode', 2).get_parameter_value().integer_value
+        self.mode = self.declare_parameter('mode', 1).get_parameter_value().integer_value
 
         # Indicate the frequency of capturing the data 
         # (it must be slower than data publishing).
@@ -101,8 +104,8 @@ class HunavEvaluatorNode(Node):
 
 
     def human_callback(self, msg):
+        self.init = True
         if(self.mode == 2):
-            self.init = True
             self.last_time = self.get_clock().now()
             #self.end_timer.reset()
             #self.get_logger().info("reseting1")
@@ -114,13 +117,13 @@ class HunavEvaluatorNode(Node):
                 self.agents = msg
 
     def robot_callback(self, msg):
+        self.init = True
         if(self.mode == 2):
-            self.init = True
             self.last_time = self.get_clock().now()
             #self.end_timer.reset()
             #self.get_logger().info("reseting2")
         if(self.recording == True):
-            #self.get_logger().info("robot received")
+            # self.get_logger().info("robot received")
             robot_msg = msg
             if(self.robot_goal is not None):
                 robot_msg.goals.clear()
@@ -159,7 +162,7 @@ class HunavEvaluatorNode(Node):
     def timer_end_callback(self):
         if(self.init == True):
             secs = (self.get_clock().now() - self.last_time).to_msg().sec
-            #self.get_logger().info("secs: %.2f" % secs)
+            self.get_logger().info("secs: %.2f" % secs)
             if(secs >= self.time_period):
                 self.recording == False
                 self.get_logger().info("Hunav evaluator stopping recording!")
@@ -190,16 +193,17 @@ class HunavEvaluatorNode(Node):
             if len(metric) > 1:
                 self.metrics_lists[m]=metric[1]
             
-        print('Metrics computed:')
-        print(self.metrics_to_compute)
+        self._logger.info('Metrics computed:')
+        self._logger.info(str(self.metrics_to_compute))
         self.store_metrics(self.result_file_path)
         
         # Now, filter according to the different behaviors
         for i in range(1,(self.number_of_behaviors+1)):
-          self.compute_metrics_behavior(i)  
-
-        self.destroy_node()
-        sys.exit()
+          self.compute_metrics_behavior(i)
+        
+        self._logger.info("Shutting down...")
+        rclpy.shutdown()
+        
         #return
 
 
@@ -298,6 +302,8 @@ class HunavEvaluatorNode(Node):
 
 
     def check_data(self):
+        self._logger.info("Checking data...")
+        self._logger.info("Agents: %i, Robot: %i" % (len(self.agents_list), len(self.robot_list)))
 
         #First check the number of messages
         agents_size = len(self.agents_list)
