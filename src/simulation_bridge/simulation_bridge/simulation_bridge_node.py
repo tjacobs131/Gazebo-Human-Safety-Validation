@@ -41,7 +41,6 @@ class SimulationBridge(Node):
         # Set up publishers
         self.vel_pub = self.create_publisher(Twist, "/cmd_vel", 5)
         self.goal_pub = self.create_publisher(PoseStamped, "/goal_pose", 1)
-        self.done_pub = self.create_publisher(Bool, "robot_done", 1)
 
         # Set up subscribers
         self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 1)
@@ -107,6 +106,7 @@ class SimulationBridge(Node):
 
         self.received_path = False
         while not self.received_path:
+            self.logger.info("Sending goal...")
             self.goal_pub.publish(goal)
             sleep(0.5)
             rclpy.spin_once(self)
@@ -135,20 +135,21 @@ class SimulationBridge(Node):
 
     def start(self):
         # Iterate through the goals and move to each one
+
         for goal in self.movement_goals:
             self.logger.info(f"Moving to goal: {goal}")
             self.move_to_goal(goal.x, goal.y, goal.yaw)
             self.logger.info("Goal reached")
             
             if goal == self.movement_goals[-1]:
-                self.logger.info("All goals reached")
+                self.logger.info("Calling evaluation service...")
                 msg = Bool()
                 msg.data = True
                 self.eval_client.wait_for_service()
                 request = Trigger.Request()
                 self.eval_client.call(request)
                 
-                self.done_pub.publish(msg)
+                self.logger.info("Scenario complete, shutting down...")
 
 
 def main():

@@ -26,7 +26,7 @@ def generate_launch_description():
         '__GLX_VENDOR_LIBRARY_NAME=nvidia ',
     ]
 
-    robot_name_in_model = 'pmb2'
+    robot_name_in_model = 'ceres_alpha'
 
     # Pose where we want to spawn the robot
     spawn_x_val = '0.0'
@@ -44,10 +44,10 @@ def generate_launch_description():
     joystick_config = os.path.join(joystick_config, 'config/xbox.config.yaml') 
 
     goal_params = DeclareLaunchArgument(
-        'goals',
+        'goals_file',
         description='Path to the goal configuration file')
     
-    goals_config = LaunchConfiguration('goals')
+    goals_config = LaunchConfiguration('goals_file')
 
     # World generation parameters
     urdf_model = LaunchConfiguration('urdf_model')
@@ -350,7 +350,7 @@ def generate_launch_description():
         description='Update rate of the plugin'
     )
     declare_robot_name = DeclareLaunchArgument(
-        'robot_name', default_value='pmb2',
+        'robot_name', default_value='ceres_alpha',
         description='Specify the name of the robot Gazebo model'
     )
     declare_frame_to_publish = DeclareLaunchArgument(
