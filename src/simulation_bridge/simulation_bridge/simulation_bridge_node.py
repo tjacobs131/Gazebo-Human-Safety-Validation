@@ -23,8 +23,8 @@ class SimulationBridge(Node):
 
     received_path = False
 
-    xy_tolerance = 0.85
-    yaw_tolerance = 0.40
+    xy_tolerance = 1.0
+    yaw_tolerance = 0.50
     standing_still_time = 0
     standing_still_time_threshold = 4 # The amount of odometry messages to confirm that the robot is standing still\
 
@@ -53,7 +53,7 @@ class SimulationBridge(Node):
 
     def load_goals(self):
         # Get parameter file
-        self.declare_parameter(name="params_file", value="goals.yaml")
+        self.declare_parameter(name="params_file")
         self.param = self.get_parameter(name="params_file").value
         if self.param is None:
             self.logger.error("No goals parameter found")
@@ -93,7 +93,7 @@ class SimulationBridge(Node):
     def move_to_goal(self, x, y, orientation):
         # Sends a goal to the navigation stack and waits for the robot to reach it
 
-        #Parameters:
+        # Parameters:
         #    x (float): x coordinate of the goal
         #    y (float): y coordinate of the goal
         #    orientation (float): w component of the quaternion representing the orientation of the goal
@@ -122,8 +122,8 @@ class SimulationBridge(Node):
         # Check odometry to see if the robot has reached the goal within tolerance
         if (abs(self.position.x - x) < self.xy_tolerance and abs(self.position.y - y) < self.xy_tolerance # Check position
                 and self.standing_still_time > self.standing_still_time_threshold): # Check if the robot is not rotating
+                self.logger.info("Robot reached the planned goal")
                 return True
-            
         return False
     
     def wait(self, seconds):
@@ -135,21 +135,23 @@ class SimulationBridge(Node):
 
     def start(self):
         # Iterate through the goals and move to each one
-
         for goal in self.movement_goals:
             self.logger.info(f"Moving to goal: {goal}")
-            self.move_to_goal(goal.x, goal.y, goal.yaw)
+            self.move_to_goal(goal.x, goal.y, goal.yaw) # Move to goal and wait for it to be reached
             self.logger.info("Goal reached")
             
+            # Check if the goal is the last one in the list
             if goal == self.movement_goals[-1]:
-                self.logger.info("Calling evaluation service...")
+                self.logger.info("Calling evaluation service...") # Important for the scenario launcher to know when evaluation is starting as it can crash sometimes
+
+                # Call the evaluation service to signal that the scenario is complete
                 msg = Bool()
                 msg.data = True
                 self.eval_client.wait_for_service()
                 request = Trigger.Request()
                 self.eval_client.call(request)
                 
-                self.logger.info("Scenario complete, shutting down...")
+                self.logger.info("Scenario complete, shutting down...") # Important for the scenario launcher to know when the scenario is complete
 
 
 def main():
