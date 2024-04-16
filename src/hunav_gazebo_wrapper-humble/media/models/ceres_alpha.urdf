@@ -419,7 +419,7 @@
 
     <material>Gazebo/Red</material>
 
-    <sensor type="gpu_ray" name="laser">
+    <sensor type="ray" name="laser">
       <pose> 0 0 0 0 0 0 </pose>
       <visualize>true</visualize>
       <update_rate>15</update_rate>
