@@ -24,7 +24,7 @@ class MetricsProcessor(Node):
         self.recording_srv = self.create_service(Trigger, 'hunav_trigger_recording', self.__recording_callback)
 
     def start(self):
-        sleep(2) # Give hunav_evaluator time to save metrics file
+        sleep(1) # Give hunav_evaluator time to save metrics file
 
         # Get metrics file from base workspace directory
         metrics_path = os.path.realpath(os.path.join(get_package_share_directory("metrics_processor"), '../../../..', 'metrics.txt'))
@@ -36,7 +36,11 @@ class MetricsProcessor(Node):
                 self.logger.error("No metrics found in file")
             else:
                 variables = metrics.split("\n")[0].split("\t")
-                values = metrics.split("\n")[1].split("\t")
+                values = metrics.split("\n")[-2].split("\t")
+
+                self.logger.info("Metrics found:")
+                self.logger.info("Variables: " + str(variables))
+                self.logger.info("Values: " + str(values))
 
                 self.logger.info("Saving safety metrics")
                 for i in range(len(variables)):
@@ -49,6 +53,10 @@ class MetricsProcessor(Node):
         with open(metrics_path, "w") as file:
             for key in safety_metrics:
                 file.write(f"{key}: {safety_metrics[key]}\n")
+            file.close()
+
+        self.logger.info("Scenario complete, shutting down...") # Signal to the scenario launcher that the metrics have been saved
+
 
     def __recording_callback(self, request, response):
         response.success = True

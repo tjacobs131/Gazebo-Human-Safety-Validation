@@ -13,12 +13,12 @@ def generate_launch_description():
 
     goal_params = DeclareLaunchArgument(
         'goals_file',
-        default_value=os.path.join(pkg_share, 'params/goals.yaml'),
+        default_value=os.path.join(pkg_share, 'params/robot_goals/test.yaml'),
         description='Path to the goal configuration file')
     
     declare_agents_conf_file = DeclareLaunchArgument(
         'configuration_file',
-        default_value=os.path.join(pkg_share, 'params/scenario1.yaml'),
+        default_value=os.path.join(pkg_share, 'params/agent_goals/scenario1.yaml'),
         description='Specify configuration file name in the config directory'
     )
     

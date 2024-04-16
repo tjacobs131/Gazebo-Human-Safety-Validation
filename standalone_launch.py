@@ -9,11 +9,11 @@ import subprocess
 from time import sleep, time
 
 def monitor_and_relaunch():
-    timeout_time = 3
+    timeout_time = 6
     pkg_share = get_package_share_directory('validate')
     validate_launch_file = 'run_scenario.launch.py'
-    goals_file = os.path.join(pkg_share, 'params/goals.yaml')
-    config_file = os.path.join(pkg_share, 'params/scenario1.yaml')
+    goals_file = os.path.join(pkg_share, 'params/robot_goals/scenario1_baseline.yaml')
+    config_file = os.path.join(pkg_share, 'params/agent_goals/scenario1.yaml')
 
     run_scenarios(validate_launch_file, goals_file, config_file, timeout_time)
 
@@ -25,9 +25,9 @@ def run_scenarios(validate_launch_file, goals_file, config_file, timeout_time):
         print(Fore.GREEN, "Killing existing processes and waiting...")
         subprocess.run(['killall', '-w', '-KILL', 'gzserver'])
         subprocess.run(['killall', '-w', '-KILL', 'gzclient'])
-        subprocess.run(['killall', '--process-group', '-w', '-KILL', 'ros2'])
+        # subprocess.run(['killall', '--process-group', '-w', '-KILL', 'ros2'])
 
-        sleep(5)
+        sleep(2)
 
         print("Launching scenario")
         # Pass the goals file and config file to the launch file
@@ -61,26 +61,33 @@ def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time):
             print('Waiting for evaluation to finish...')
             evaluation_timeout_timer = time()
 
-        elif 'Shutting down...' in line:
+        elif 'Scenario complete, shutting down...' in line:
+            sleep(1)
             print('Killing...')
-            shutdown_timeout_timer = time()
             terminate_process(proc)
             break
 
         if evaluation_timeout_timer > 0 and time() - evaluation_timeout_timer > timeout_time:
             print(Fore.YELLOW, "Timeout, evaluation service likely crashed.")
             print(Fore.YELLOW, "Killing...")
+
+            # Should relaunch with same scenario
             terminate_process(proc)
             break
-        
-    sleep(5)
 
 def terminate_process(proc):
+    shutdown_timeout_timer = time()
+    shutdown_timeout_time = 10
+
     print(Fore.RED, "Killing...")
     proc.send_signal(subprocess.signal.SIGINT)
     while proc.poll() is None:
         sleep(1)
         proc.send_signal(subprocess.signal.SIGINT)
+        if time() - shutdown_timeout_timer > shutdown_timeout_time:
+            print(Fore.RED, "Failed to shutdown, killing...")
+            proc.send_signal(subprocess.signal.SIGTERM)
+            break
 
 if __name__ == '__main__':
     monitor_and_relaunch()

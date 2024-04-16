@@ -201,7 +201,6 @@ class HunavEvaluatorNode(Node):
         for i in range(1,(self.number_of_behaviors+1)):
           self.compute_metrics_behavior(i)
         
-        self._logger.info("Shutting down...")
         rclpy.shutdown()
         
         #return
@@ -249,7 +248,6 @@ class HunavEvaluatorNode(Node):
 
     
     def store_metrics(self, result_file):
-
         list_file = result_file
         # add extension if it does not have it
         if not result_file.endswith(".txt"):

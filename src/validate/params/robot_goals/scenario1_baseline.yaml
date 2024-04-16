@@ -1,0 +1,7 @@
+/simulation_bridge:
+  ros__parameters:
+    goals:
+      goal0: {x_pos: 2.0, y_pos: -2.0, yaw: 0.5}
+      goal1: {x_pos: 4.0, y_pos: -3.6, yaw: 0.0}
+      goal2: {x_pos: 6.0, y_pos: -2.0, yaw: -0.5}
+      goal3: {x_pos: 8.0, y_pos: 0.0, yaw: 0.0}

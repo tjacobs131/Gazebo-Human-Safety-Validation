@@ -1,6 +1,10 @@
 import curses
 import math
+import select
 import subprocess
+import sys
+import termios
+import tty
 import yaml
 from timeit import default_timer
 import rclpy
@@ -106,24 +110,29 @@ class SimulationBridge(Node):
 
         self.received_path = False
         while not self.received_path:
-            self.logger.info("Sending goal...")
+            self.logger.info("No goal received, sending again...")
             self.goal_pub.publish(goal)
             sleep(0.5)
             rclpy.spin_once(self)
 
         while not self.reached_goal(x, y):
+            self.logger.info("Goal not reached yet, waiting...")
             sleep(0.5)
             rclpy.spin_once(self)
         
     def reached_goal(self, x, y):
         if self.position is None:
+            self.logger.error("No odometry data received (yet)")
             return False
         
         # Check odometry to see if the robot has reached the goal within tolerance
         if (abs(self.position.x - x) < self.xy_tolerance and abs(self.position.y - y) < self.xy_tolerance # Check position
                 and self.standing_still_time > self.standing_still_time_threshold): # Check if the robot is not rotating
                 self.logger.info("Robot reached the planned goal")
+                self.standing_still_time = 0
                 return True
+        
+        self.logger.info(f"Robot has not reached the goal yet. Current position: ({self.position.x}, {self.position.y})")
         return False
     
     def wait(self, seconds):
@@ -133,33 +142,58 @@ class SimulationBridge(Node):
             rclpy.spin_once(self)
             sleep(0.1)
 
+    def start_eval(self):
+        self.logger.info("Calling evaluation service...") # Signal to the scenario launcher that the scenario is complete, starts its timeout timer
+
+        # Call the evaluation service to signal that the scenario is complete
+        msg = Bool()
+        msg.data = True
+        self.eval_client.wait_for_service()
+        request = Trigger.Request()
+        self.eval_client.call(request)
+
     def start(self):
+        if len(self.movement_goals) == 0:
+            while self.getKey() != ' ':
+                self.logger.info("Press space to start evaluation")
+                sleep(0.1)
+                rclpy.spin_once(self)
+
         # Iterate through the goals and move to each one
         for goal in self.movement_goals:
             self.logger.info(f"Moving to goal: {goal}")
             self.move_to_goal(goal.x, goal.y, goal.yaw) # Move to goal and wait for it to be reached
-            self.logger.info("Goal reached")
+            self.logger.info(f"Goal #{self.movement_goals.index(goal) + 1} reached")
             
             # Check if the goal is the last one in the list
             if goal == self.movement_goals[-1]:
-                self.logger.info("Calling evaluation service...") # Important for the scenario launcher to know when evaluation is starting as it can crash sometimes
-
-                # Call the evaluation service to signal that the scenario is complete
-                msg = Bool()
-                msg.data = True
-                self.eval_client.wait_for_service()
-                request = Trigger.Request()
-                self.eval_client.call(request)
+                self.logger.info("Last goal reached")
+                self.start_eval()
                 
-                self.logger.info("Scenario complete, shutting down...") # Important for the scenario launcher to know when the scenario is complete
 
+    def getKey(self):
+        # tty.setraw():Change the file descriptor fd mode to raw; fileno(): returns an integer file descriptor (fd)
+        tty.setraw(sys.stdin.fileno())
+        
+        # select():Directly call the IO interface of the operating system; monitor all file handles with fileno() method
+        rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
+
+        # Read a byte of input stream
+        if rlist: key = sys.stdin.read(1)
+        else: key = ''
+
+        # tcsetattr sets the tty attribute of the file descriptor fd from the attribute
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN)
+
+        return key
+            
 
 def main():
     rclpy.init()
 
-    simulation_bridge = SimulationBridge()
+    node = SimulationBridge()
 
-    rclpy.spin(simulation_bridge)
+    rclpy.spin(node)
 
-    simulation_bridge.destroy_node()
+    node.destroy_node()
     rclpy.shutdown()
