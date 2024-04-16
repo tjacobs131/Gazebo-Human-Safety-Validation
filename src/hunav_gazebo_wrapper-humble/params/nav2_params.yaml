@@ -133,8 +133,8 @@ controller_server:
       PathDist.scale: 24.0
       GoalDist.scale: 22.0
       RotateToGoal.scale: 32.0
-      RotateToGoal.slowing_factor: 2.0
-      RotateToGoal.lookahead_time: -1.0
+      RotateToGoal.slowing_factor: 5.0
+      RotateToGoal.lookahead_time: 1.0
 
 local_costmap:
   local_costmap:

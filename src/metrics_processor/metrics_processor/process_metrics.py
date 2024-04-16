@@ -38,10 +38,6 @@ class MetricsProcessor(Node):
                 variables = metrics.split("\n")[0].split("\t")
                 values = metrics.split("\n")[-2].split("\t")
 
-                self.logger.info("Metrics found:")
-                self.logger.info("Variables: " + str(variables))
-                self.logger.info("Values: " + str(values))
-
                 self.logger.info("Saving safety metrics")
                 for i in range(len(variables)):
                     if variables[i] in self.target_variables:

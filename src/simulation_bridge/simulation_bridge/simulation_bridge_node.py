@@ -91,7 +91,6 @@ class SimulationBridge(Node):
     def _planned_path(self, msg):
         # Confirm that the planned goal has been turned into a path
         if not self.received_path:
-            self.logger.info("Planned path received")
             self.received_path = True
 
     def move_to_goal(self, x, y, orientation):
@@ -128,11 +127,9 @@ class SimulationBridge(Node):
         # Check odometry to see if the robot has reached the goal within tolerance
         if (abs(self.position.x - x) < self.xy_tolerance and abs(self.position.y - y) < self.xy_tolerance # Check position
                 and self.standing_still_time > self.standing_still_time_threshold): # Check if the robot is not rotating
-                self.logger.info("Robot reached the planned goal")
                 self.standing_still_time = 0
                 return True
         
-        self.logger.info(f"Robot has not reached the goal yet. Current position: ({self.position.x}, {self.position.y})")
         return False
     
     def wait(self, seconds):
@@ -153,12 +150,6 @@ class SimulationBridge(Node):
         self.eval_client.call(request)
 
     def start(self):
-        if len(self.movement_goals) == 0:
-            while self.getKey() != ' ':
-                self.logger.info("Press space to start evaluation")
-                sleep(0.1)
-                rclpy.spin_once(self)
-
         # Iterate through the goals and move to each one
         for goal in self.movement_goals:
             self.logger.info(f"Moving to goal: {goal}")
@@ -167,25 +158,7 @@ class SimulationBridge(Node):
             
             # Check if the goal is the last one in the list
             if goal == self.movement_goals[-1]:
-                self.logger.info("Last goal reached")
                 self.start_eval()
-                
-
-    def getKey(self):
-        # tty.setraw():Change the file descriptor fd mode to raw; fileno(): returns an integer file descriptor (fd)
-        tty.setraw(sys.stdin.fileno())
-        
-        # select():Directly call the IO interface of the operating system; monitor all file handles with fileno() method
-        rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
-
-        # Read a byte of input stream
-        if rlist: key = sys.stdin.read(1)
-        else: key = ''
-
-        # tcsetattr sets the tty attribute of the file descriptor fd from the attribute
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN)
-
-        return key
             
 
 def main():
