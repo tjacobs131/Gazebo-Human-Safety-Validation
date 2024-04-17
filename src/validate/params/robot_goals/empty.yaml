@@ -1,0 +1,3 @@
+/simulation_bridge:
+  ros__parameters:
+    goals: {}

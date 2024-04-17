@@ -1,4 +1,5 @@
 import os
+import signal
 from colorama import Fore
 from ament_index_python.packages import get_package_share_directory
 import launch
@@ -9,6 +10,8 @@ import subprocess
 from time import sleep, time
 
 def monitor_and_relaunch():
+    signal.signal(signal.SIGINT, signal_handler)
+
     timeout_time = 6
     pkg_share = get_package_share_directory('validate')
     validate_launch_file = 'run_scenario.launch.py'
@@ -25,7 +28,7 @@ def run_scenarios(validate_launch_file, goals_file, config_file, timeout_time):
         print(Fore.GREEN, "Killing existing processes and waiting...")
         subprocess.run(['killall', '-w', '-KILL', 'gzserver'])
         subprocess.run(['killall', '-w', '-KILL', 'gzclient'])
-        # subprocess.run(['killall', '--process-group', '-w', '-KILL', 'ros2'])
+        subprocess.run(['killall', '--process-group', '-w', '-KILL', 'ros2'])
 
         sleep(2)
 
@@ -64,7 +67,7 @@ def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time):
         elif 'Scenario complete, shutting down...' in line:
             sleep(1)
             print('Killing...')
-            terminate_process(proc)
+            end_scenario(proc)
             break
 
         if evaluation_timeout_timer > 0 and time() - evaluation_timeout_timer > timeout_time:
@@ -72,8 +75,23 @@ def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time):
             print(Fore.YELLOW, "Killing...")
 
             # Should relaunch with same scenario
-            terminate_process(proc)
+            end_scenario(proc)
             break
+
+def end_scenario(proc):
+    # Get file: safety_metrics.txt
+    print(Fore.GREEN, "Getting safety metrics...")
+
+    path = os.path.dirname(os.path.abspath(__file__))
+
+    with open(os.path.abspath(os.path.join(path, '/safety_metrics.txt')), 'r') as file:
+        with open(os.path.abspath(os.path.join(path, 'metrics_scenario1.txt')), 'w') as metrics_file:
+            metrics_file.write(file.read())
+            metrics_file.write('\n\n\n')
+            metrics_file.close()
+    
+    terminate_process(proc)
+
 
 def terminate_process(proc):
     shutdown_timeout_timer = time()
@@ -88,6 +106,13 @@ def terminate_process(proc):
             print(Fore.RED, "Failed to shutdown, killing...")
             proc.send_signal(subprocess.signal.SIGTERM)
             break
+
+def signal_handler(sig, frame):
+    print(Fore.RED, "Received INT signal, killing...")
+    subprocess.run(['killall', '-w', '-KILL', 'gzserver'])
+    subprocess.run(['killall', '-w', '-KILL', 'gzclient'])
+    subprocess.run(['killall', '--process-group', '-w', '-KILL', 'ros2'])
+
 
 if __name__ == '__main__':
     monitor_and_relaunch()
