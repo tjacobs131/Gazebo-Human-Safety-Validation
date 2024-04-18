@@ -16,6 +16,7 @@ from time import sleep, time
 from dataclasses import dataclass
 from std_msgs.msg import Bool
 from std_srvs.srv import Trigger
+from hunav_msgs.msg import Agents
 
 class SimulationBridge(Node):
 
@@ -34,6 +35,9 @@ class SimulationBridge(Node):
 
     movement_goals = []
 
+    scenario_fail_timeout = 30 # Number of odometry messages to wait before shutting down the scenario
+    has_moved = False
+
     def __init__(self):
         super().__init__('simulation_bridge')
 
@@ -49,6 +53,7 @@ class SimulationBridge(Node):
         # Set up subscribers
         self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 1)
         self.planned_path = self.create_subscription(Path, "plan", self._planned_path, 1)
+        self.human_states = self.create_subscription(Agents, "human_states", self._human_states, 1)
 
         # Set up stop evaluation client
         self.eval_client = self.create_client(Trigger, 'hunav_trigger_recording')
@@ -87,11 +92,24 @@ class SimulationBridge(Node):
             self.standing_still_time += 1
         else: 
             self.standing_still_time = 0
+            self.has_moved = True
+
+        if (len(self.movement_goals) > 0
+        and self.standing_still_time > self.scenario_fail_timeout
+        and not self.has_moved):
+            self.logger.error("Robot has been standing still for too long, shutting down...")
+            self.logger.info("Scenario failed, shutting down...")
             
     def _planned_path(self, msg):
         # Confirm that the planned goal has been turned into a path
         if not self.received_path:
             self.received_path = True
+    
+    def _human_states(self, msg):
+        self.logger.info(f"Human states received: {msg}")
+        if len(msg.agents) == 0:
+            self.logger.info("No human agents detected")
+            self.logger.info("Scenario failed, shutting down...") # Necessary for the scenario launcher to know that the scenario has failed
 
     def move_to_goal(self, x, y, orientation):
         # Sends a goal to the navigation stack and waits for the robot to reach it
