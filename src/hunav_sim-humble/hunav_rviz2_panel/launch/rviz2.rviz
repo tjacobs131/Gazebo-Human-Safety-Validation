@@ -26,7 +26,6 @@ Panels:
     Topic: ""
   - Class: hunav_rviz2_panel/HunavMetricsPanel
     Name: HunavMetricsPanel
-    Topic: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -81,6 +80,7 @@ Visualization Manager:
       Topic:
         Depth: 5
         Durability Policy: Volatile
+        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /map
@@ -92,52 +92,125 @@ Visualization Manager:
         Value: /map_updates
       Use Timestamp: false
       Value: true
-    - Alpha: 0.9
+    - Alpha: 0.8999999761581421
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
       Class: rviz_default_plugins/LaserScan
       Color: 160; 160; 164
+      Color Transformer: ""
+      Decay Time: 0
       Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
       Name: LaserScan
-      Size (m): 0.15
+      Position Transformer: ""
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.15000000596046448
       Style: Boxes
       Topic:
         Depth: 5
         Durability Policy: Volatile
+        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /scan
-
-    - Alpha: 0.9
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 0.8999999761581421
+      Buffer Length: 1
       Class: rviz_default_plugins/Path
       Color: 160; 160; 164
       Enabled: true
+      Head Diameter: 0.15000000596046448
+      Head Length: 0.05000000074505806
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
       Name: Path
-      Pose Style: Arrows
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
       Pose Color: 143; 240; 164
-      Shaft Diameter: 0.08
-      Head Diameter: 0.15
-      Shaft Length: 0.1
-      Head Length: 0.05
+      Pose Style: Arrows
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.07999999821186066
+      Shaft Length: 0.10000000149011612
       Topic:
         Depth: 5
         Durability Policy: Volatile
+        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /plan
-
-    - Alpha: 0.9
-      Class: rviz_default_plugins/TF
-      Color: 160; 160; 164
+      Value: true
+    - Class: rviz_default_plugins/TF
       Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        base_link:
+          Value: true
+        laser_frame:
+          Value: true
+      Marker Scale: 1
       Name: TF
-
-    - Alpha: 0.75
+      Show Arrows: true
+      Show Axes: true
+      Show Names: false
+      Tree:
+        {}
+      Update Interval: 0
+      Value: true
+    - Angle Tolerance: 0.10000000149011612
       Class: rviz_default_plugins/Odometry
-      Keep: 20
-      Covariance: False
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: false
       Enabled: true
-      Topic: /odom
+      Keep: 20
       Name: Odometry
-
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 1
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /odom
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -153,6 +226,9 @@ Visualization Manager:
     - Class: rviz_default_plugins/Measure
       Line color: 128; 128; 0
     - Class: rviz_default_plugins/SetInitialPose
+      Covariance x: 0.25
+      Covariance y: 0.25
+      Covariance yaw: 0.06853891909122467
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -200,7 +276,7 @@ Visualization Manager:
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: -1.5707963705062866
+      Yaw: 4.71238899230957
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 31.19211196899414
@@ -232,7 +308,7 @@ Window Geometry:
     collapsed: false
   HunavPanel:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd000000040000000000000156000002f4fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d00000224000000c900fffffffb0000001400480075006e0061007600500061006e0065006c0100000267000000ca000000ca00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000002f4fc0200000004fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003d0000018a000000a400fffffffb0000002200480075006e00610076004d00650074007200690063007300500061006e0065006c01000001cd000001640000007300fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d006501000000000000045000000000000000000000023f000002f400000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000156000002f4fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d00000224000000c900fffffffb0000001400480075006e0061007600500061006e0065006c0100000267000000ca000000ca00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000002f4fc0200000004fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003d0000018a000000a400fffffffb0000002200480075006e00610076004d00650074007200690063007300500061006e0065006c01000001cd000001640000008700fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d006501000000000000045000000000000000000000023f000002f400000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
@@ -240,5 +316,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 60
+  X: 70
   Y: 60
