@@ -172,7 +172,7 @@ def generate_launch_description():
                 condition=IfCondition(PythonExpression(['not ', slam])),
                 launch_arguments={
                     'namespace': namespace,
-                    'map': map_yaml_file,
+                    #'map': map_yaml_file,
                     'use_sim_time': use_sim_time,
                     'autostart': autostart,
                     'params_file': params_file,

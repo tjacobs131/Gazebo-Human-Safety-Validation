@@ -418,14 +418,14 @@ namespace hunav_rviz2_panel
     }
     else{
       try {
-      pkg_shared_tree_dir_ = ament_index_cpp::get_package_share_directory("hunav_agent_manager");
+      pkg_shared_tree_dir_ = ament_index_cpp::get_package_share_directory("validate");
 
       } catch (const char* msg) {
         RCLCPP_ERROR(this->get_logger(),
                     "Package hunav_agent_manager not found in dir: %s!!!",
                     pkg_shared_tree_dir_.c_str());
       }
-      pkg_shared_tree_dir_ = pkg_shared_tree_dir_ + "/config/agents.yaml";
+      pkg_shared_tree_dir_ = pkg_shared_tree_dir_ + "/params/agent_goals/agents.yaml";
     }
     
     // Open file to save agents

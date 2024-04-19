@@ -24,7 +24,7 @@ class MetricsProcessor(Node):
         self.recording_srv = self.create_service(Trigger, 'hunav_trigger_recording', self.__recording_callback)
 
     def start(self):
-        sleep(1) # Give hunav_evaluator time to save metrics file
+        sleep(0.5) # Give hunav_evaluator time to save metrics file
 
         # Get metrics file from base workspace directory
         metrics_path = os.path.realpath(os.path.join(get_package_share_directory("metrics_processor"), '../../../..', 'metrics.txt'))

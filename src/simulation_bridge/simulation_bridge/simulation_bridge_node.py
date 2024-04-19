@@ -106,7 +106,6 @@ class SimulationBridge(Node):
             self.received_path = True
     
     def _human_states(self, msg):
-        self.logger.info(f"Human states received: {msg}")
         if len(msg.agents) == 0:
             self.logger.info("No human agents detected")
             self.logger.info("Scenario failed, shutting down...") # Necessary for the scenario launcher to know that the scenario has failed
@@ -133,7 +132,6 @@ class SimulationBridge(Node):
             rclpy.spin_once(self)
 
         while not self.reached_goal(x, y):
-            self.logger.info("Goal not reached yet, waiting...")
             sleep(0.5)
             rclpy.spin_once(self)
         
