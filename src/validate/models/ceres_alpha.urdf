@@ -2,6 +2,14 @@
 
 <robot
   name="ceres_alpha">
+
+  <link name="base_footprint"/>
+  <joint name="base_joint" type="fixed">
+      <parent link="base_footprint"/>
+      <child link="base_link"/>
+      <origin xyz="0 0 0.825" rpy="0 0 0"/>
+  </joint>
+
   <link
     name="base_link">
     <inertial>
@@ -480,7 +488,7 @@
 
       <odometry_topic>odom</odometry_topic>
       <odometry_frame>odom</odometry_frame>
-      <robot_base_frame>base_link</robot_base_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
  
       <odometry_source>1</odometry_source>
       <ros>

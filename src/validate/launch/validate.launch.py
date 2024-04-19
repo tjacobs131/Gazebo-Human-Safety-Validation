@@ -31,14 +31,14 @@ def generate_launch_description():
     # Pose where we want to spawn the robot
     spawn_x_val = '0.0'
     spawn_y_val = '0.0'
-    spawn_z_val = '1.3'
+    spawn_z_val = '.91'
     spawn_yaw_val = '0.00'
 
     pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')
     # Set the path to this package.
     hunav_gazebo_pkg_share = FindPackageShare(package='hunav_gazebo_wrapper').find('hunav_gazebo_wrapper')
     
-    default_urdf_model_path = os.path.join(hunav_gazebo_pkg_share, 'models/ceres_alpha.urdf')
+    default_urdf_model_path = os.path.join(get_package_share_directory("validate"), 'models/ceres_alpha.urdf')
 
     joystick_config = FindPackageShare(package='teleop_twist_joy').find('teleop_twist_joy')
     joystick_config = os.path.join(joystick_config, 'config/xbox.config.yaml') 
@@ -217,7 +217,7 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}]
     )
     
-    urdf_path = os.path.join(hunav_gazebo_pkg_share + "/models/ceres_alpha.urdf")
+    urdf_path = os.path.join(get_package_share_directory("validate") + "/models/ceres_alpha.urdf")
     with open(urdf_path, 'r') as infp:
         robot_desc = infp.read()
 

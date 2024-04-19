@@ -13,6 +13,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/params/agent_goals', glob('params/agent_goals/*')),
         ('share/' + package_name + '/params/robot_goals', glob('params/robot_goals/*')),
+        ('share/' + package_name + '/models', glob('models/*')),
         ('share/' + package_name + '/launch', glob('launch/*')),
     ],
     install_requires=['setuptools'],
