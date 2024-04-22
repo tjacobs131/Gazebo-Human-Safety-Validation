@@ -108,9 +108,6 @@ def end_scenario(scenario_count):
 
 
 def terminate_process():
-    shutdown_timeout_timer = time()
-    shutdown_timeout_time = 15
-
     print(Fore.RED, "Killing...")
 
     kill_all()
