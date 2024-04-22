@@ -10,40 +10,42 @@ import launch_ros
 import subprocess
 from time import sleep, time
 
-scenario_count = 2
-
 def start():
     signal.signal(signal.SIGINT, signal_handler)
 
     timeout_time = 6
-    pkg_share = get_package_share_directory('validate')
-    validate_launch_file = 'run_scenario.launch.py'
-    scenario_file_name = 'scenario' + str(scenario_count) + '.yaml'
-    goals_file = os.path.join(pkg_share, 'params/robot_goals/', scenario_file_name)
-    config_file = os.path.join(pkg_share, 'params/agent_goals/', scenario_file_name)
 
     kill_all()
+    
+    run_scenarios(timeout_time)
 
-    run_scenarios(validate_launch_file, goals_file, config_file, timeout_time)
+def run_scenarios(timeout_time):
+    scenario_count = 1
+    
+    pkg_share = get_package_share_directory('validate')
+    validate_launch_file = 'run_scenario.launch.py'
 
-def run_scenarios(validate_launch_file, goals_file, config_file, timeout_time):
     while True:
+        scenario_file_name = 'scenario' + str(scenario_count) + '.yaml'
+        goals_file = os.path.join(pkg_share, 'params/robot_goals/', scenario_file_name)
+        config_file = os.path.join(pkg_share, 'params/agent_goals/', scenario_file_name)
+
         evaluation_timeout_timer = 0
         sleep(1)
 
-        print("Launching scenario")
+        print(Fore.GREEN, "Launching scenario ", scenario_count, "...")
         # Pass the goals file and config file to the launch file
         proc = subprocess.Popen(['ros2', 'launch', 'validate', validate_launch_file, 'goals_file:=' + goals_file, 'configuration_file:=' + config_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         try:
-            monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time)
+            scenario_count = monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, scenario_count)
         except Exception as e:
             print(Fore.RED, "Error: ", e)
             print(Fore.RED, "Killing...")
             proc.terminate()
             proc.wait()  # Wait for the process to terminate
 
-def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time):
+def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, scenario_count):
     while True:
         line = proc.stdout.readline()
         if not line:
@@ -73,21 +75,20 @@ def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time):
         elif 'Scenario complete, shutting down...' in line:
             sleep(1)
             print('Killing...')
-            end_scenario(proc)
+            end_scenario(scenario_count)
             print(Fore.GREEN, "Scenario completed successfully.")
             print(Fore.GREEN, "Launching next scenario...")
-            scenario_count += 1
-            break
+            return scenario_count + 1
 
         if evaluation_timeout_timer > 0 and time() - evaluation_timeout_timer > timeout_time:
             print(Fore.YELLOW, "Timeout, evaluation service likely crashed.")
             print(Fore.YELLOW, "Killing...")
 
             # Should relaunch with same scenario
-            end_scenario(proc)
+            terminate_process()
             break
 
-def end_scenario(proc):
+def end_scenario(scenario_count):
     # Get file: safety_metrics.txt
     print(Fore.GREEN, "Getting safety metrics...")
 
@@ -121,11 +122,21 @@ def signal_handler(sig, frame):
     
 
 def kill_all():
+    timeout_time = 10
+    timeout_timer = time()
     print(Fore.GREEN, "Killing existing processes and waiting...")
-    subprocess.run(['killall', '-w', '-KILL', 'gzserver'])
-    subprocess.run(['killall', '--process-group', '-w', '-KILL', 'ros2'])
+
     subprocess.run(['killall', '-w', '-KILL', 'rviz2'])
+    subprocess.run(['killall', '-w', '-KILL', 'gzserver'])
     subprocess.run(['killall', '-w', '-KILL', 'gzclient'])
+
+    while True:
+        subprocess.run(['killall', '-KILL', 'ros2'])
+        sleep(1)
+
+        if time() - timeout_timer > timeout_time:
+            print(Fore.RED, "Timeout, some processes may still be running.")
+            break
     sleep(2)
 
 

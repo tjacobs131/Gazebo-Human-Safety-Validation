@@ -441,7 +441,7 @@
         </scan>
         <range>
           <min>0.79</min>
-          <max>10</max>
+          <max>20</max>
         </range>
       </ray>
       <plugin filename="libgazebo_ros_ray_sensor.so" name="gazebo_ros_lidar">
