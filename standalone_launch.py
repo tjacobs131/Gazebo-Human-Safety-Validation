@@ -1,6 +1,8 @@
+from datetime import datetime
 import os
 from pathlib import Path
 import signal
+import sys
 from colorama import Fore
 from ament_index_python.packages import get_package_share_directory
 import launch
@@ -20,15 +22,32 @@ def start():
     run_scenarios(timeout_time)
 
 def run_scenarios(timeout_time):
-    scenario_count = 1
+    if len(sys.argv) > 1:
+        scenario_count = int(sys.argv[1])
+    else:
+        scenario_count = 1
+
+    print(Fore.GREEN, "Starting with scenario ", scenario_count, "...")
     
     pkg_share = get_package_share_directory('validate')
     validate_launch_file = 'run_scenario.launch.py'
+
+    current_time = datetime.now()
 
     while True:
         scenario_file_name = 'scenario' + str(scenario_count) + '.yaml'
         goals_file = os.path.join(pkg_share, 'params/robot_goals/', scenario_file_name)
         config_file = os.path.join(pkg_share, 'params/agent_goals/', scenario_file_name)
+
+        if not os.path.exists(goals_file) or not os.path.exists(config_file):
+            if scenario_count == None:
+                print(Fore.RED, "Scenario error")
+                kill_all()
+                exit(1)
+
+            print(Fore.GREEN, "All scenarios completed.")
+            kill_all()
+            exit(0)
 
         evaluation_timeout_timer = 0
         sleep(1)
@@ -38,14 +57,14 @@ def run_scenarios(timeout_time):
         proc = subprocess.Popen(['ros2', 'launch', 'validate', validate_launch_file, 'goals_file:=' + goals_file, 'configuration_file:=' + config_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         try:
-            scenario_count = monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, scenario_count)
+            scenario_count = monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, scenario_count, current_time)
         except Exception as e:
             print(Fore.RED, "Error: ", e)
             print(Fore.RED, "Killing...")
-            proc.terminate()
+            proc.kill()
             proc.wait()  # Wait for the process to terminate
 
-def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, scenario_count):
+def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, scenario_count, current_time):
     while True:
         line = proc.stdout.readline()
         if not line:
@@ -69,13 +88,14 @@ def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, sc
         if 'Scenario failed, shutting down...' in line:
             print(Fore.RED, "Scenario failed.")
             print(Fore.GREEN, "Launching same scenario...")
-            terminate_process()
-            break
+            terminate_process(proc)
+            return scenario_count
 
         elif 'Scenario complete, shutting down...' in line:
             sleep(1)
             print('Killing...')
-            end_scenario(scenario_count)
+            save_results(scenario_count, current_time)
+            terminate_process(proc)
             print(Fore.GREEN, "Scenario completed successfully.")
             print(Fore.GREEN, "Launching next scenario...")
             return scenario_count + 1
@@ -85,29 +105,28 @@ def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, sc
             print(Fore.YELLOW, "Killing...")
 
             # Should relaunch with same scenario
-            terminate_process()
-            break
+            terminate_process(proc)
+            return scenario_count
 
-def end_scenario(scenario_count):
-    # Get file: safety_metrics.txt
+def save_results(scenario_count, current_time):
     print(Fore.GREEN, "Getting safety metrics...")
 
     path = Path.cwd()
-    Path(os.path.join(path, "scenario_metrics")).mkdir(parents=True, exist_ok=True)
+    current_time_folder = current_time.strftime('%Y-%m-%d_%H-%M-%S')
+    scenario_metrics_folder = os.path.join(path, "scenario_metrics", current_time_folder)
+    Path(scenario_metrics_folder).mkdir(parents=True, exist_ok=True)
 
-    scenario_metrics_file = os.path.join(path, 'scenario_metrics/metrics_scenario' + str(scenario_count) + '.txt')
+    scenario_metrics_file = os.path.join(scenario_metrics_folder, 'metrics_scenario' + str(scenario_count) + '.txt')
     print(Fore.YELLOW, f'Saving metrics for scenario {scenario_count} in {scenario_metrics_file}')
 
     with open(os.path.join(path, 'safety_metrics.txt'), 'r') as file:
-        with open(os.path.join(path, scenario_metrics_file), 'w') as metrics_file:
+        with open(scenario_metrics_file, 'w') as metrics_file:
             metrics_file.write(file.read())
             metrics_file.write('\n\n\n')
             metrics_file.close()
-    
-    terminate_process()
 
 
-def terminate_process():
+def terminate_process(proc):
     print(Fore.RED, "Killing...")
 
     kill_all()
@@ -119,23 +138,25 @@ def signal_handler(sig, frame):
     
 
 def kill_all():
-    timeout_time = 10
+    timeout_time = 8
     timeout_timer = time()
     print(Fore.GREEN, "Killing existing processes and waiting...")
 
     subprocess.run(['killall', '-w', '-KILL', 'rviz2'])
     subprocess.run(['killall', '-w', '-KILL', 'gzserver'])
-    subprocess.run(['killall', '-w', '-KILL', 'gzclient'])
+    subprocess.run(['killall', '-w', '-KILL', 'gzclient'])\
 
     while True:
         subprocess.run(['killall', '-KILL', 'ros2'])
         sleep(1)
 
         if time() - timeout_timer > timeout_time:
-            print(Fore.RED, "Timeout, some processes may still be running.")
+            print(Fore.YELLOW, "Timeout, some processes may still be running.")
             break
-    sleep(2)
 
+    subprocess.run(['ros2', 'daemon', 'stop'])
+
+    sleep(2)
 
 if __name__ == '__main__':
     start()
