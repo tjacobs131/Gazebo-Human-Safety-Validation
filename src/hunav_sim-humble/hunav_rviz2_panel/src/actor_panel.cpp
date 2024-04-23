@@ -418,7 +418,7 @@ namespace hunav_rviz2_panel
     }
     else{
       try {
-      pkg_shared_tree_dir_ = ament_index_cpp::get_package_share_directory("validate");
+      pkg_shared_tree_dir_ = ament_index_cpp::get_package_prefix("validate");
 
       } catch (const char* msg) {
         RCLCPP_ERROR(this->get_logger(),
@@ -502,7 +502,7 @@ namespace hunav_rviz2_panel
         names_counter++;
       }
 
-      RCLCPP_INFO(this->get_logger(), "Generating agents.yaml");
+      RCLCPP_INFO(this->get_logger(), "Generating agents.yaml in %s", pkg_shared_tree_dir_.c_str());
         
       // Writes hunav_loader node to file
       file << hunav_loader;

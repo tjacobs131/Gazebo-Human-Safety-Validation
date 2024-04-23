@@ -30,6 +30,7 @@ class MetricsProcessor(Node):
         metrics_path = os.path.realpath(os.path.join(get_package_share_directory("metrics_processor"), '../../../..', 'metrics.txt'))
         safety_metrics = {}
 
+        # Read metrics file
         with open(metrics_path, "r") as file:
             metrics = file.read()
             if metrics is None:
@@ -38,6 +39,7 @@ class MetricsProcessor(Node):
                 variables = metrics.split("\n")[0].split("\t")
                 values = metrics.split("\n")[-2].split("\t")
 
+                # Extract metrics related to safety
                 self.logger.info("Saving safety metrics")
                 for i in range(len(variables)):
                     if variables[i] in self.target_variables:
@@ -55,6 +57,7 @@ class MetricsProcessor(Node):
 
 
     def __recording_callback(self, request, response):
+        # Recording finished, save metrics
         response.success = True
         response.message = "Recording started"
 

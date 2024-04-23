@@ -1,10 +1,3 @@
-import curses
-import math
-import select
-import subprocess
-import sys
-import termios
-import tty
 import yaml
 from timeit import default_timer
 import rclpy
@@ -72,6 +65,7 @@ class SimulationBridge(Node):
         # Load goals from parameter file
         with open(self.param, "r") as file:
             config = yaml.safe_load(file)
+
             goals = config["/simulation_bridge"]["ros__parameters"]["goals"]
             if goals is None:
                 self.logger.error("No goals found in parameter file")
