@@ -26,8 +26,6 @@ def run_scenarios(timeout_time):
         scenario_count = int(sys.argv[1])
     else:
         scenario_count = 1
-
-    print(Fore.GREEN, "Starting with scenario ", scenario_count, "...")
     
     pkg_share = get_package_share_directory('validate')
     validate_launch_file = 'run_scenario.launch.py'
@@ -129,6 +127,9 @@ def save_results(scenario_count, current_time):
 def terminate_process(proc):
     print(Fore.RED, "Killing...")
 
+    proc.send_signal(signal.SIGINT)
+    proc.wait()
+
     kill_all()
 
 def signal_handler(sig, frame):
@@ -138,25 +139,29 @@ def signal_handler(sig, frame):
     
 
 def kill_all():
-    timeout_time = 8
-    timeout_timer = time()
     print(Fore.GREEN, "Killing existing processes and waiting...")
 
-    subprocess.run(['killall', '-w', '-KILL', 'rviz2'])
-    subprocess.run(['killall', '-w', '-KILL', 'gzserver'])
-    subprocess.run(['killall', '-w', '-KILL', 'gzclient'])\
-
-    while True:
-        subprocess.run(['killall', '-KILL', 'ros2'])
-        sleep(1)
-
-        if time() - timeout_timer > timeout_time:
-            print(Fore.YELLOW, "Timeout, some processes may still be running.")
-            break
+    kill_process('rviz2')
+    kill_process('gzserver')
+    kill_process('gzclient')
+    kill_process('ros2')
 
     subprocess.run(['ros2', 'daemon', 'stop'])
 
-    sleep(2)
+def kill_process(process_name):
+    timeout_time = 4
+    timeout_timer = time()
+    while True:
+        result = subprocess.run(['sudo', 'pkill', '-KILL', process_name])
+        sleep(1)
+        if result.returncode == 1:
+            print(Fore.GREEN, process_name, " killed.")
+            break
+
+        if time() - timeout_timer > timeout_time:
+            print(Fore.YELLOW, "Timeout, ", process_name, " may still be running.")
+            break
+
 
 if __name__ == '__main__':
     start()

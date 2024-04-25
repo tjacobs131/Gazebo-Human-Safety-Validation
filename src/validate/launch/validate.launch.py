@@ -358,7 +358,7 @@ def generate_launch_description():
         description='Name of the global frame in which the position of the agents are provided'
     )
     declare_use_navgoal = DeclareLaunchArgument(
-        'use_navgoal_to_start', default_value='false',
+        'use_navgoal_to_start', default_value='true',
         description='Whether to start the agents movements when a navigation goal is received or not'
     )
     declare_ignore_models = DeclareLaunchArgument(

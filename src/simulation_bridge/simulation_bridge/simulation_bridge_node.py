@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from std_msgs.msg import Bool
 from std_srvs.srv import Trigger
 from hunav_msgs.msg import Agents
+from diagnostic_msgs.msg import DiagnosticArray
 
 class SimulationBridge(Node):
 
@@ -28,8 +29,9 @@ class SimulationBridge(Node):
 
     movement_goals = []
 
-    scenario_fail_timeout = 30 # Number of odometry messages to wait before shutting down the scenario
+    scenario_fail_timeout = 15 # Number of odometry messages to wait before shutting down the scenario
     has_moved = False
+    ready = False
 
     def __init__(self):
         super().__init__('simulation_bridge')
@@ -47,6 +49,7 @@ class SimulationBridge(Node):
         self.odom_sub = self.create_subscription(Odometry, "odom", self._odometry, 1)
         self.planned_path = self.create_subscription(Path, "plan", self._planned_path, 1)
         self.human_states = self.create_subscription(Agents, "human_states", self._human_states, 1)
+        self.diagnostics = self.create_subscription(DiagnosticArray, '/diagnostics', self._diagnostics, 1)
 
         # Set up stop evaluation client
         self.eval_client = self.create_client(Trigger, 'hunav_trigger_recording')
@@ -65,8 +68,10 @@ class SimulationBridge(Node):
         # Load goals from parameter file
         with open(self.param, "r") as file:
             config = yaml.safe_load(file)
+            self.logger.info(f"Config: {config}")
 
             goals = config["/simulation_bridge"]["ros__parameters"]["goals"]
+            self.logger.info(f"Goals: {goals}")
             if goals is None:
                 self.logger.error("No goals found in parameter file")
                 raise ValueError("No goals found in parameter file")
@@ -78,6 +83,13 @@ class SimulationBridge(Node):
                 except KeyError:
                     pass
         self.logger.info(f"Goals: {self.movement_goals}")
+
+    def _diagnostics(self, msg):
+        # Check each message in the diagnostics array for errors
+        for status in msg.status:
+            if 'Nav2 is active' in status.message:
+                self.logger.info("Navigation stack is active")
+                self.ready = True
 
     def _odometry(self, msg):
         # Store odometry data to be used in the move_to_goal function
@@ -119,6 +131,14 @@ class SimulationBridge(Node):
         goal.pose.orientation.w = orientation
 
         self.received_path = False
+
+        while not self.ready:
+            self.logger.info("Navigation stack not ready, waiting...")
+            sleep(0.5)
+            rclpy.spin_once(self)
+
+        sleep(2)
+
         while not self.received_path:
             self.logger.info("No goal received, sending again...")
             self.goal_pub.publish(goal)
