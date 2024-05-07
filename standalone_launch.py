@@ -4,6 +4,7 @@ from pathlib import Path
 import signal
 import sys
 from colorama import Fore
+import yaml
 from ament_index_python.packages import get_package_share_directory
 import launch
 import launch.actions
@@ -37,7 +38,7 @@ def run_scenarios(timeout_time):
         goals_file = os.path.join(pkg_share, 'params/robot_goals/', scenario_file_name)
         config_file = os.path.join(pkg_share, 'params/agent_goals/', scenario_file_name)
 
-        if not os.path.exists(goals_file) or not os.path.exists(config_file):
+        if not os.path.exists(goals_file) or not os.path.exists(config_file) or scenario_count < 1:
             if scenario_count == None:
                 print(Fore.RED, "Scenario error")
                 kill_all()
@@ -48,11 +49,16 @@ def run_scenarios(timeout_time):
             exit(0)
 
         evaluation_timeout_timer = 0
-        sleep(1)
+
+        # Get initial position from goals file
+        initial_pos_x, initial_pos_y, initial_pos_yaw = get_initial_position(goals_file)
 
         print(Fore.GREEN, "Launching scenario ", scenario_count, "...")
         # Pass the goals file and config file to the launch file
-        proc = subprocess.Popen(['ros2', 'launch', 'validate', validate_launch_file, 'goals_file:=' + goals_file, 'configuration_file:=' + config_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(['ros2', 'launch', 'validate', validate_launch_file, 'goals_file:=' + goals_file, 'configuration_file:=' + config_file,
+                                 'initial_pos_x:=' + initial_pos_x,
+                                 'initial_pos_y:=' + initial_pos_y,
+                                 'initial_pos_yaw:=' + initial_pos_yaw], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         try:
             scenario_count = monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, scenario_count, current_time)
@@ -61,6 +67,17 @@ def run_scenarios(timeout_time):
             print(Fore.RED, "Killing...")
             proc.kill()
             proc.wait()  # Wait for the process to terminate
+
+def get_initial_position(goals_file):
+    print(goals_file)
+    with open(goals_file, 'r') as file:
+        config = yaml.safe_load(file)
+        config = config["/simulation_bridge"]["ros__parameters"]
+        initial_pos_x = config["init_pos_x"]
+        initial_pos_y = config["init_pos_y"]
+        initial_pos_yaw = config["init_pos_yaw"]
+
+    return str(initial_pos_x), str(initial_pos_y), str(initial_pos_yaw)
 
 def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, scenario_count, current_time):
     while True:
@@ -73,7 +90,8 @@ def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, sc
                     print(Fore.GREEN, "Scenario completed successfully.")
                 else:
                     print(Fore.RED, "Scenario failed with exit code ", poll)
-                break
+                    print(Fore.GREEN, "Launching same scenario...")
+                return scenario_count
         
         line = line.decode('utf-8').strip()
 
@@ -90,12 +108,13 @@ def monitor_scenario_completion(proc, evaluation_timeout_timer, timeout_time, sc
             return scenario_count
 
         elif 'Scenario complete, shutting down...' in line:
-            sleep(1)
             print('Killing...')
             save_results(scenario_count, current_time)
             terminate_process(proc)
             print(Fore.GREEN, "Scenario completed successfully.")
             print(Fore.GREEN, "Launching next scenario...")
+            if not sys.argv[1] == None:
+                return -1
             return scenario_count + 1
 
         if evaluation_timeout_timer > 0 and time() - evaluation_timeout_timer > timeout_time:
@@ -146,6 +165,15 @@ def kill_all():
     kill_process('gzclient')
     kill_process('ros2')
 
+    # Get ros2 node list
+    ros2_node_list = subprocess.run(['ros2', 'node', 'list'], stdout=subprocess.PIPE)
+    ros2_node_list = ros2_node_list.stdout.decode('utf-8').split('\n')
+
+    for node in ros2_node_list:
+        if node:
+            print(Fore.GREEN, "Shutting down node: ", node)
+            subprocess.run(['ros2', 'lifecycle', 'set', node, 'cleanup'])
+
     subprocess.run(['ros2', 'daemon', 'stop'])
 
 def kill_process(process_name):
@@ -153,14 +181,13 @@ def kill_process(process_name):
     timeout_timer = time()
     while True:
         result = subprocess.run(['sudo', 'pkill', '-KILL', process_name])
-        sleep(1)
         if result.returncode == 1:
             print(Fore.GREEN, process_name, " killed.")
-            break
+            return
 
         if time() - timeout_timer > timeout_time:
             print(Fore.YELLOW, "Timeout, ", process_name, " may still be running.")
-            break
+            return
 
 
 if __name__ == '__main__':

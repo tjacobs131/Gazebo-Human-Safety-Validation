@@ -18,6 +18,7 @@ from launch_ros.substitutions import FindPackageShare
 from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
                                 OnProcessIO, OnProcessStart, OnShutdown)
 
+
 def generate_launch_description():
 
     # to activate the use of nvidia gpu
@@ -26,26 +27,12 @@ def generate_launch_description():
         '__GLX_VENDOR_LIBRARY_NAME=nvidia ',
     ]
 
-    robot_name_in_model = 'ceres_alpha'
-
-    # Pose where we want to spawn the robot
-    spawn_x_val = '0.0'
-    spawn_y_val = '0.0'
-    spawn_z_val = '.91'
-    spawn_yaw_val = '0.00'
-
-    pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')
     # Set the path to this package.
     hunav_gazebo_pkg_share = FindPackageShare(package='hunav_gazebo_wrapper').find('hunav_gazebo_wrapper')
-    
-    default_urdf_model_path = os.path.join(get_package_share_directory("validate"), 'models/ceres_alpha.urdf')
+    validate_pkg_share = FindPackageShare(package='validate').find('validate')
 
     joystick_config = FindPackageShare(package='teleop_twist_joy').find('teleop_twist_joy')
     joystick_config = os.path.join(joystick_config, 'config/xbox.config.yaml') 
-
-    goal_params = DeclareLaunchArgument(
-        'goals_file',
-        description='Path to the goal configuration file')
     
     goals_config = LaunchConfiguration('goals_file')
 
@@ -216,17 +203,6 @@ def generate_launch_description():
         output='screen',
         parameters=[{'use_sim_time': True}]
     )
-    
-    urdf_path = os.path.join(get_package_share_directory("validate") + "/models/ceres_alpha.urdf")
-    with open(urdf_path, 'r') as infp:
-        robot_desc = infp.read()
-
-    state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        parameters=[{'robot_description': robot_desc}],
-    )
 
     metrics_file = PathJoinSubstitution([
         FindPackageShare('hunav_evaluator'),
@@ -249,6 +225,29 @@ def generate_launch_description():
     
     nav2_bringup = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(hunav_gazebo_pkg_share + '/launch/nav2_bringup.launch.py')
+    )
+
+    initial_pos_x_arg = DeclareLaunchArgument(
+        name='initial_pos_x',
+        default_value='0.0',
+        description='Initial position x'
+    )
+
+    initial_pos_y_arg = DeclareLaunchArgument(
+        name='initial_pos_y',
+        default_value='0.0',
+        description='Initial position y'
+    )
+
+    initial_pos_yaw_arg = DeclareLaunchArgument(
+        name='initial_pos_yaw',
+        default_value='0.0',
+        description='Initial position yaw'
+    )
+
+    spawn_ceres = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(validate_pkg_share + '/launch/spawn_ceres.launch.py'),
+        launch_arguments={'initial_pos_x' : LaunchConfiguration('initial_pos_x'), 'initial_pos_y' : LaunchConfiguration('initial_pos_y'), 'initial_pos_yaw' : LaunchConfiguration('initial_pos_yaw')}.items()
     )
 
     odometry_readout = TimerAction(
@@ -295,18 +294,6 @@ def generate_launch_description():
         name='teleop_twist_joy_node', 
         parameters=[joystick_config],
     )
-
-    # Launch the robot
-    spawn_entity_cmd = Node(
-        package='gazebo_ros', 
-        executable='spawn_entity.py',
-        arguments=['-entity', robot_name_in_model, 
-                   '-file', default_urdf_model_path,
-                        '-x', spawn_x_val,
-                        '-y', spawn_y_val,
-                        '-z', spawn_z_val,
-                        '-Y', spawn_yaw_val],
-                        output='screen')
     
     pmb2_bringup = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(hunav_gazebo_pkg_share + '/launch/pmb2_pal.launch.py')
@@ -321,15 +308,9 @@ def generate_launch_description():
         # other option: arguments = "0 0 0 0 0 0 pmb2 base_footprint".split(' ')
     )
 
-      # Declare the launch arguments  
-    declare_urdf_model_path_cmd = DeclareLaunchArgument(
-        name='urdf_model', 
-        default_value=default_urdf_model_path, 
-        description='Absolute path to robot urdf file')
-
     declare_agents_conf_file = DeclareLaunchArgument(
         'configuration_file',
-        description='Specify configuration file name in the cofig directory'
+        description='Specify configuration file name in the config directory'
     )
 
     declare_metrics_conf_file = DeclareLaunchArgument(
@@ -395,14 +376,14 @@ def generate_launch_description():
     ld.add_action(metrics_processor)
     ld.add_action(odometry_readout)
 
-    ld.add_action(declare_urdf_model_path_cmd)
-    ld.add_action(spawn_entity_cmd)
-
-    ld.add_action(state_publisher)
-
     ld.add_action(joy_node)
     ld.add_action(teleop_node)
     ld.add_action(nav2_bringup)
+
+    ld.add_action(initial_pos_x_arg)
+    ld.add_action(initial_pos_y_arg)
+    ld.add_action(initial_pos_yaw_arg)
+    ld.add_action(spawn_ceres)
 
     # Generate the world with the agents
     # launch hunav_loader and the WorldGenerator
@@ -426,12 +407,3 @@ def generate_launch_description():
     #ld.add_action(gzclient_process)    
 
     return ld
-
-    
-
-
-# Add boolean commands if true
-def _boolean_command(arg):
-    cmd = ['"--', arg, '" if "true" == "', LaunchConfiguration(arg), '" else ""']
-    py_cmd = PythonExpression(cmd)
-    return py_cmd
