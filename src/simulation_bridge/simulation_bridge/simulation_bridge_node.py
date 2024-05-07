@@ -85,11 +85,12 @@ class SimulationBridge(Node):
         self.logger.info(f"Goals: {self.movement_goals}")
 
     def _diagnostics(self, msg):
-        # Check each message in the diagnostics array for errors
-        for status in msg.status:
-            if 'Nav2 is active' in status.message:
-                self.logger.info("Navigation stack is active")
-                self.ready = True
+        if not self.ready:
+            # Check each message in the diagnostics array for errors
+            for status in msg.status:
+                if 'Nav2 is active' in status.message:
+                    self.logger.info("Navigation stack is active")
+                    self.ready = True
 
     def _odometry(self, msg):
         # Store odometry data to be used in the move_to_goal function
@@ -132,13 +133,6 @@ class SimulationBridge(Node):
 
         self.received_path = False
 
-        while not self.ready:
-            self.logger.info("Navigation stack not ready, waiting...")
-            sleep(0.5)
-            rclpy.spin_once(self)
-
-        sleep(2)
-
         while not self.received_path:
             self.logger.info("No goal received, sending again...")
             self.goal_pub.publish(goal)
@@ -180,6 +174,14 @@ class SimulationBridge(Node):
         self.eval_client.call(request)
 
     def start(self):
+        # Wait for the navigation stack to be ready
+        while not self.ready:
+            self.logger.info("Navigation stack not ready, waiting...")
+            sleep(0.5)
+            rclpy.spin_once(self)
+
+        sleep(2)
+
         # Iterate through the goals and move to each one
         for goal in self.movement_goals:
             self.logger.info(f"Moving to goal: {goal}")
