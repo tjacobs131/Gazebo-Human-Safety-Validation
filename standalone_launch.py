@@ -45,7 +45,6 @@ def run_scenarios(timeout_time):
                 exit(1)
 
             print(Fore.GREEN, "All scenarios completed.")
-            kill_all()
             exit(0)
 
         evaluation_timeout_timer = 0
@@ -139,8 +138,11 @@ def save_results(scenario_count, current_time):
     with open(os.path.join(path, 'safety_metrics.txt'), 'r') as file:
         with open(scenario_metrics_file, 'w') as metrics_file:
             metrics_file.write(file.read())
-            metrics_file.write('\n\n\n')
             metrics_file.close()
+
+    # Run metrics_graphing.py
+    print(Fore.GREEN, "Generating graph...")
+    subprocess.run(['python3', 'metrics_graphing.py'])
 
 
 def terminate_process(proc):
@@ -160,19 +162,31 @@ def signal_handler(sig, frame):
 def kill_all():
     print(Fore.GREEN, "Killing existing processes and waiting...")
 
-    kill_process('rviz2')
-    kill_process('gzserver')
-    kill_process('gzclient')
-    kill_process('ros2')
+    sleep(1)
 
     # Get ros2 node list
     ros2_node_list = subprocess.run(['ros2', 'node', 'list'], stdout=subprocess.PIPE)
     ros2_node_list = ros2_node_list.stdout.decode('utf-8').split('\n')
+    skip_node_timeout = 4
+
+    print("Killing nodes...")
 
     for node in ros2_node_list:
         if node:
             print(Fore.GREEN, "Shutting down node: ", node)
-            subprocess.run(['ros2', 'lifecycle', 'set', node, 'cleanup'])
+            sleep(0.1)
+            try:
+                subprocess.run(['ros2', 'lifecycle', 'set', node, 'shutdown'], timeout=skip_node_timeout)
+            except subprocess.TimeoutExpired:
+                print(Fore.YELLOW, "Timeout, node may still be running...")
+                continue
+
+            print("Node ", node, " was shut down successfully")
+
+    kill_process('rviz2')
+    kill_process('gzserver')
+    kill_process('gzclient')
+    kill_process('ros2')
 
     subprocess.run(['ros2', 'daemon', 'stop'])
 

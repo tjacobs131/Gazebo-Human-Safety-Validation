@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 # Read the data
 data = pd.read_csv('metrics_steps_1.txt', delimiter='\t')
 time_stamps = data['time_stamps']
@@ -28,4 +29,5 @@ lines = lines1 + lines2
 labels = labels1 + labels2
 ax1.legend(lines, labels, loc='upper left')
 
-plt.show()
+# Save the plot
+plt.savefig('metrics_steps_1.png')

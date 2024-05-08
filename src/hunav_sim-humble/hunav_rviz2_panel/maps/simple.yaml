@@ -1,7 +1,7 @@
-free_thresh: 0.90
-negate: 0
-origin: [-16.000000, -16.000000, 0.0]
-resolution: 0.010000
-mode: trinary
-occupied_thresh: 0.95
 image: simple.pgm
+mode: trinary
+resolution: 0.01
+origin: [-16, -16, 0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.25
